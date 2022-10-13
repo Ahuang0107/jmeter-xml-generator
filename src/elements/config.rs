@@ -4,10 +4,10 @@ use crate::elements::base::{bool_prop, collection_prop, element_prop, string_pro
 use crate::script::ScriptElement;
 
 #[allow(dead_code)]
-pub(crate) fn config_test_element(
-    host: &'static str,
-    port: &'static str,
-) -> ScriptElement<'static> {
+pub(crate) fn config_test_element<'a>(
+    host: &'a str,
+    port: &'a str,
+) -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("ConfigTestElement")
             .attr("guiclass", "HttpDefaultsGui")
@@ -25,7 +25,7 @@ pub(crate) fn config_test_element(
 }
 
 #[allow(dead_code)]
-pub(crate) fn header_manager(headers: Vec<(&'static str, &'static str)>) -> ScriptElement<'static> {
+pub(crate) fn header_manager<'a>(headers: Vec<(&'a str, &'a str)>) -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("HeaderManager")
             .attr("guiclass", "HeaderPanel")
@@ -43,7 +43,7 @@ pub(crate) fn header_manager(headers: Vec<(&'static str, &'static str)>) -> Scri
 }
 
 #[allow(dead_code)]
-pub(crate) fn cookie_manager() -> ScriptElement<'static> {
+pub(crate) fn cookie_manager<'a>() -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("CookieManager")
             .attr("guiclass", "CookiePanel")
@@ -61,7 +61,7 @@ pub(crate) fn cookie_manager() -> ScriptElement<'static> {
 }
 
 #[allow(dead_code)]
-pub(crate) fn header(name: &'static str, value: &'static str) -> ScriptElement<'static> {
+pub(crate) fn header<'a>(name: &'a str, value: &'a str) -> ScriptElement<'a> {
     element_prop(
         "",
         "Header",
@@ -73,7 +73,7 @@ pub(crate) fn header(name: &'static str, value: &'static str) -> ScriptElement<'
 }
 
 #[allow(dead_code)]
-fn arguments(args: Vec<ScriptElement<'static>>) -> ScriptElement<'static> {
+fn arguments(args: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from(
         XmlEvent::start_element("elementProp")
             .attr("name", "HTTPsampler.Arguments")

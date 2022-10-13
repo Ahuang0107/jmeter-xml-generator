@@ -4,7 +4,7 @@ use crate::elements::base::{bool_prop, string_prop};
 use crate::script::ScriptElement;
 
 #[allow(dead_code)]
-pub(crate) fn thread_group() -> ScriptElement<'static> {
+pub(crate) fn thread_group<'a>() -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("ThreadGroup")
             .attr("guiclass", "ThreadGroupGui")

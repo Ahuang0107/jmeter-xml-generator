@@ -4,30 +4,30 @@ use crate::elements::base::{bool_prop, collection_prop, element_prop, string_pro
 use crate::script::ScriptElement;
 
 #[allow(dead_code)]
-pub(crate) fn get_simple(path: &'static str) -> ScriptElement<'static> {
+pub(crate) fn get_simple(path: &str) -> ScriptElement {
     http_sampler_proxy(path, "GET", false, vec![])
 }
 
 #[allow(dead_code)]
-pub(crate) fn post_simple(path: &'static str) -> ScriptElement<'static> {
+pub(crate) fn post_simple(path: &str) -> ScriptElement {
     http_sampler_proxy(path, "GET", false, vec![])
 }
 
 #[allow(dead_code)]
-pub(crate) fn post_multipart(
-    path: &'static str,
-    args: Vec<(&'static str, &'static str)>,
-) -> ScriptElement<'static> {
+pub(crate) fn post_multipart<'a>(
+    path: &'a str,
+    args: Vec<(&'a str, &'a str)>,
+) -> ScriptElement<'a> {
     http_sampler_proxy(path, "POST", true, args)
 }
 
 #[allow(dead_code)]
-fn http_sampler_proxy(
-    path: &'static str,
-    method: &'static str,
+fn http_sampler_proxy<'a>(
+    path: &'a str,
+    method: &'a str,
     multipart: bool,
-    args: Vec<(&'static str, &'static str)>,
-) -> ScriptElement<'static> {
+    args: Vec<(&'a str, &'a str)>,
+) -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("HTTPSamplerProxy")
             .attr("guiclass", "HttpTestSampleGui")
@@ -58,7 +58,7 @@ fn http_sampler_proxy(
 }
 
 #[allow(dead_code)]
-fn arguments(args: Vec<ScriptElement<'static>>) -> ScriptElement<'static> {
+fn arguments(args: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from(
         XmlEvent::start_element("elementProp")
             .attr("name", "HTTPsampler.Arguments")
@@ -72,7 +72,7 @@ fn arguments(args: Vec<ScriptElement<'static>>) -> ScriptElement<'static> {
 }
 
 #[allow(dead_code)]
-fn argument(name: &'static str, value: &'static str) -> ScriptElement<'static> {
+fn argument<'a>(name: &'a str, value: &'a str) -> ScriptElement<'a> {
     element_prop(
         "",
         "HTTPArgument",

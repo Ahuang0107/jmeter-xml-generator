@@ -4,7 +4,7 @@ use crate::elements::base::{bool, bool_prop, obj_prop, string, string_prop, valu
 use crate::script::ScriptElement;
 
 #[allow(dead_code)]
-pub(crate) fn result_collector() -> ScriptElement<'static> {
+pub(crate) fn result_collector<'a>() -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("ResultCollector")
             .attr("guiclass", "ViewResultsFullVisualizer")

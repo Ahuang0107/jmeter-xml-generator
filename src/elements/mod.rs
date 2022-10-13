@@ -13,7 +13,11 @@ mod listeners;
 mod threads;
 
 #[allow(dead_code)]
-pub fn root_element() -> ScriptElement<'static> {
+pub fn root<'a>(
+    host: &'a str,
+    port: &'a str,
+    headers: Vec<(&'a str, &'a str)>,
+) -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("jmeterTestPlan")
             .attr("version", "1.2")
@@ -22,12 +26,9 @@ pub fn root_element() -> ScriptElement<'static> {
         vec![ScriptElement::from(
             XmlEvent::start_element("hashTree"),
             vec![
-                config_test_element("192.168.206.112", "8080"),
+                config_test_element(host, port),
                 ScriptElement::from_empty(XmlEvent::start_element("hashTree")),
-                header_manager(vec![
-                    ("appCode", "resource"),
-                    ("test", "7EBZfzzrPWHBmXJtl#86LDs6varwXlYF"),
-                ]),
+                header_manager(headers),
                 ScriptElement::from_empty(XmlEvent::start_element("hashTree")),
                 cookie_manager(),
                 ScriptElement::from_empty(XmlEvent::start_element("hashTree")),

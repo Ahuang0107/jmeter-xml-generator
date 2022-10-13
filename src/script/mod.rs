@@ -1,8 +1,8 @@
 use std::io::Write;
 
+use xml::EventWriter;
 use xml::writer::events::StartElementBuilder;
 use xml::writer::XmlEvent;
-use xml::EventWriter;
 
 pub struct ScriptElement<'a> {
     start: StartElementBuilder<'a>,
