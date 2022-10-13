@@ -44,10 +44,7 @@ pub(crate) fn element_prop<'a>(
 }
 
 #[allow(dead_code)]
-pub(crate) fn obj_prop<'a>(
-    name: &'a str,
-    value: ScriptElement<'a>,
-) -> ScriptElement<'a> {
+pub(crate) fn obj_prop<'a>(name: &'a str, value: ScriptElement<'a>) -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("objProp"),
         vec![

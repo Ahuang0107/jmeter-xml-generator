@@ -1,7 +1,8 @@
 use xml::writer::XmlEvent;
 
 use crate::elements::config::{config_test_element, cookie_manager, header_manager};
-use crate::elements::http::post_multipart;
+use crate::elements::http::http_sampler_proxy;
+pub(crate) use crate::elements::http::Request;
 use crate::elements::listeners::result_collector;
 use crate::elements::threads::thread_group;
 use crate::script::ScriptElement;
@@ -17,7 +18,23 @@ pub fn root<'a>(
     host: &'a str,
     port: &'a str,
     headers: Vec<(&'a str, &'a str)>,
+    requests: Vec<Request<'a>>,
 ) -> ScriptElement<'a> {
+    let mut request_scripts: Vec<ScriptElement> = vec![];
+    requests.into_iter().for_each(|req| {
+        let with_json = req.with_json();
+        request_scripts.push(http_sampler_proxy(req));
+        if with_json {
+            request_scripts.push(ScriptElement::from(
+                XmlEvent::start_element("hashTree"),
+                vec![header_manager(vec![("Content-Type", "application/json")])],
+            ))
+        } else {
+            request_scripts.push(ScriptElement::from_empty(XmlEvent::start_element(
+                "hashTree",
+            )))
+        }
+    });
     ScriptElement::from(
         XmlEvent::start_element("jmeterTestPlan")
             .attr("version", "1.2")
@@ -39,13 +56,7 @@ pub fn root<'a>(
                     XmlEvent::start_element("hashTree"),
                     vec![
                         thread_group(),
-                        ScriptElement::from(
-                            XmlEvent::start_element("hashTree"),
-                            vec![post_multipart(
-                                "/endpoint/admin_user/login",
-                                vec![("username", "smarthubdev"), ("password", "smarthub@1234")],
-                            )],
-                        ),
+                        ScriptElement::from(XmlEvent::start_element("hashTree"), request_scripts),
                     ],
                 ),
             ],

@@ -1,7 +1,6 @@
 use xml::EmitterConfig;
 
-use crate::elements::root;
-use crate::script::ScriptElement;
+use crate::elements::{root, Request};
 
 #[allow(dead_code)]
 pub struct ScriptBuilder<'a> {
@@ -9,7 +8,7 @@ pub struct ScriptBuilder<'a> {
     port: &'a str,
     num_threads: usize,
     headers: Vec<(&'a str, &'a str)>,
-    requests: Vec<ScriptElement<'a>>,
+    requests: Vec<Request<'a>>,
 }
 
 #[allow(dead_code)]
@@ -26,6 +25,9 @@ impl<'a> ScriptBuilder<'a> {
     pub fn add_header(&mut self, k: &'a str, v: &'a str) {
         self.headers.push((k, v));
     }
+    pub fn add_request(&mut self, req: Request<'a>) {
+        self.requests.push(req);
+    }
     pub fn build(&self) -> Vec<u8> {
         let mut target: Vec<u8> = Vec::new();
 
@@ -37,6 +39,10 @@ impl<'a> ScriptBuilder<'a> {
                 .iter()
                 .map(|h| (h.0, h.1))
                 .collect::<Vec<(&'a str, &'a str)>>(),
+            self.requests
+                .iter()
+                .map(|h| h.clone())
+                .collect::<Vec<Request<'a>>>(),
         );
 
         script.write(&mut writer);

@@ -4,10 +4,7 @@ use crate::elements::base::{bool_prop, collection_prop, element_prop, string_pro
 use crate::script::ScriptElement;
 
 #[allow(dead_code)]
-pub(crate) fn config_test_element<'a>(
-    host: &'a str,
-    port: &'a str,
-) -> ScriptElement<'a> {
+pub(crate) fn config_test_element<'a>(host: &'a str, port: &'a str) -> ScriptElement<'a> {
     ScriptElement::from(
         XmlEvent::start_element("ConfigTestElement")
             .attr("guiclass", "HttpDefaultsGui")
