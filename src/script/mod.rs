@@ -1,29 +1,22 @@
-use std::io::Write;
+use crate::xml::{EventWriter, StartElementBuilder, XmlEvent};
 
-use xml::EventWriter;
-use xml::writer::events::StartElementBuilder;
-use xml::writer::XmlEvent;
-
-pub struct ScriptElement<'a> {
-    start: StartElementBuilder<'a>,
-    child: &'a str,
-    children: Vec<ScriptElement<'a>>,
+pub struct ScriptElement {
+    start: StartElementBuilder,
+    child: String,
+    children: Vec<ScriptElement>,
 }
 
-impl<'a> ScriptElement<'a> {
+impl ScriptElement {
     #[allow(dead_code)]
-    pub fn from(
-        start: StartElementBuilder<'a>,
-        children: Vec<ScriptElement<'a>>,
-    ) -> ScriptElement<'a> {
+    pub fn from(start: StartElementBuilder, children: Vec<ScriptElement>) -> ScriptElement {
         ScriptElement {
             start,
-            child: "",
+            child: "".to_string(),
             children,
         }
     }
     #[allow(dead_code)]
-    pub fn from_str(start: StartElementBuilder<'a>, child: &'a str) -> ScriptElement<'a> {
+    pub fn from_str(start: StartElementBuilder, child: String) -> ScriptElement {
         ScriptElement {
             start,
             child,
@@ -31,18 +24,21 @@ impl<'a> ScriptElement<'a> {
         }
     }
     #[allow(dead_code)]
-    pub fn from_empty(start: StartElementBuilder<'a>) -> ScriptElement<'a> {
+    pub fn from_empty(start: StartElementBuilder) -> ScriptElement {
         ScriptElement {
             start,
-            child: "",
+            child: "".to_string(),
             children: Vec::new(),
         }
     }
     #[allow(dead_code)]
-    pub fn write<W: Write>(self, writer: &mut EventWriter<W>) {
-        writer.write(self.start).expect("");
+    pub fn write(self, writer: &mut EventWriter) {
+        let name = self.start.name();
+        writer.write(self.start.into()).expect("");
         writer.write(XmlEvent::characters(self.child)).expect("");
         self.children.into_iter().for_each(|c| c.write(writer));
-        writer.write(XmlEvent::end_element()).expect("");
+        writer
+            .write(XmlEvent::end_element(Some(name)).into())
+            .expect("");
     }
 }

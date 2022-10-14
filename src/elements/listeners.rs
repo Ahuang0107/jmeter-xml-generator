@@ -1,54 +1,56 @@
-use xml::writer::XmlEvent;
-
 use crate::elements::base::{bool, bool_prop, obj_prop, string, string_prop, value};
 use crate::script::ScriptElement;
+use crate::xml::XmlEvent;
 
 #[allow(dead_code)]
-pub(crate) fn result_collector<'a>() -> ScriptElement<'a> {
+pub(crate) fn result_collector() -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("ResultCollector")
-            .attr("guiclass", "ViewResultsFullVisualizer")
-            .attr("testclass", "ResultCollector")
-            .attr("testname", "View Results Tree")
-            .attr("enabled", "true"),
+        XmlEvent::start_element("ResultCollector".to_string())
+            .attr(
+                "guiclass".to_string(),
+                "ViewResultsFullVisualizer".to_string(),
+            )
+            .attr("testclass".to_string(), "ResultCollector".to_string())
+            .attr("testname".to_string(), "View Results Tree".to_string())
+            .attr("enabled".to_string(), "true".to_string()),
         vec![
-            bool_prop("ResultCollector.error_logging", false),
+            bool_prop("ResultCollector.error_logging".to_string(), false),
             obj_prop(
-                "saveConfig",
+                "saveConfig".to_string(),
                 value(
-                    "SampleSaveConfiguration",
+                    "SampleSaveConfiguration".to_string(),
                     vec![
-                        bool("time", true),
-                        bool("latency", true),
-                        bool("timestamp", true),
-                        bool("success", true),
-                        bool("label", true),
-                        bool("code", true),
-                        bool("message", true),
-                        bool("threadName", true),
-                        bool("dataType", true),
-                        bool("encoding", false),
-                        bool("assertions", true),
-                        bool("subresults", true),
-                        bool("responseData", false),
-                        bool("samplerData", false),
-                        bool("xml", false),
-                        bool("fieldNames", true),
-                        bool("responseHeaders", false),
-                        bool("requestHeaders", false),
-                        bool("responseDataOnError", false),
-                        bool("saveAssertionResultsFailureMessage", true),
-                        string("assertionsResultsToSave", "0"),
-                        bool("bytes", true),
-                        bool("sentBytes", true),
-                        bool("url", true),
-                        bool("threadCounts", true),
-                        bool("idleTime", true),
-                        bool("connectTime", true),
+                        bool("time".to_string(), true),
+                        bool("latency".to_string(), true),
+                        bool("timestamp".to_string(), true),
+                        bool("success".to_string(), true),
+                        bool("label".to_string(), true),
+                        bool("code".to_string(), true),
+                        bool("message".to_string(), true),
+                        bool("threadName".to_string(), true),
+                        bool("dataType".to_string(), true),
+                        bool("encoding".to_string(), false),
+                        bool("assertions".to_string(), true),
+                        bool("subresults".to_string(), true),
+                        bool("responseData".to_string(), false),
+                        bool("samplerData".to_string(), false),
+                        bool("xml".to_string(), false),
+                        bool("fieldNames".to_string(), true),
+                        bool("responseHeaders".to_string(), false),
+                        bool("requestHeaders".to_string(), false),
+                        bool("responseDataOnError".to_string(), false),
+                        bool("saveAssertionResultsFailureMessage".to_string(), true),
+                        string("assertionsResultsToSave".to_string(), "0".to_string()),
+                        bool("bytes".to_string(), true),
+                        bool("sentBytes".to_string(), true),
+                        bool("url".to_string(), true),
+                        bool("threadCounts".to_string(), true),
+                        bool("idleTime".to_string(), true),
+                        bool("connectTime".to_string(), true),
                     ],
                 ),
             ),
-            string_prop("filename", ""),
+            string_prop("filename".to_string(), "".to_string()),
         ],
     )
 }

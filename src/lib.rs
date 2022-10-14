@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 mod builder;
 mod elements;
 mod script;
+mod xml;
 
 #[wasm_bindgen]
 extern "C" {
@@ -23,8 +24,6 @@ pub fn hello_world() {
 
 #[cfg(test)]
 mod tests {
-    extern crate xml;
-
     use std::fs::File;
     use std::io::Write;
 
@@ -33,40 +32,47 @@ mod tests {
 
     #[test]
     fn test() {
-        let mut script_builder = ScriptBuilder::new("192.168.206.112", "8080", 2);
-        script_builder.add_header("appCode", "resource");
-        script_builder.add_header("test", "7EBZfzzrPWHBmXJtl#86LDs6varwXlYF");
+        let mut script_builder =
+            ScriptBuilder::new("192.168.206.112".to_string(), "8080".to_string(), 2);
+        script_builder.add_header("appCode".to_string(), "resource".to_string());
+        script_builder.add_header(
+            "test".to_string(),
+            "7EBZfzzrPWHBmXJtl#86LDs6varwXlYF".to_string(),
+        );
         script_builder.add_request(Request::from(
-            "/endpoint/admin_user/login",
-            "post",
+            "/endpoint/admin_user/login".to_string(),
+            "post".to_string(),
             true,
-            vec![("username", "smarthubdev"), ("password", "smarthub@1234")],
+            vec![
+                ("username".to_string(), "smarthubdev".to_string()),
+                ("password".to_string(), "smarthub@1234".to_string()),
+            ],
             None,
         ));
         script_builder.add_request(Request::from(
-            "/endpoint/basic/data_dictionary/bu_list",
-            "get",
+            "/endpoint/basic/data_dictionary/bu_list".to_string(),
+            "get".to_string(),
             false,
             vec![],
             None,
         ));
         script_builder.add_request(Request::from(
-            "/endpoint/basic/data_dictionary/list",
-            "get",
+            "/endpoint/basic/data_dictionary/list".to_string(),
+            "get".to_string(),
             false,
-            vec![("type", "4")],
+            vec![("type".to_string(), "4".to_string())],
             None,
         ));
         script_builder.add_request(Request::from(
-            "/endpoint/erp/budget/page",
-            "post",
+            "/endpoint/erp/budget/page".to_string(),
+            "post".to_string(),
             false,
             vec![],
-            Some("{\"current\":1,\"size\":15,\"status\":0}"),
+            Some("{\"current\":1,\"size\":15,\"status\":0}".to_string()),
         ));
         let target = script_builder.build();
 
-        let mut file = File::create("temp/file.jmx").expect("");
+        let mut file = File::create("temp/file.jmx".to_string()).expect("");
 
         file.write_all(&target).expect("");
     }

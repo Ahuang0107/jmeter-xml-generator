@@ -1,19 +1,18 @@
-use xml::EmitterConfig;
-
 use crate::elements::{root, Request};
+use crate::xml::EventWriter;
 
 #[allow(dead_code)]
-pub struct ScriptBuilder<'a> {
-    host: &'a str,
-    port: &'a str,
+pub struct ScriptBuilder {
+    host: String,
+    port: String,
     num_threads: usize,
-    headers: Vec<(&'a str, &'a str)>,
-    requests: Vec<Request<'a>>,
+    headers: Vec<(String, String)>,
+    requests: Vec<Request>,
 }
 
 #[allow(dead_code)]
-impl<'a> ScriptBuilder<'a> {
-    pub fn new(host: &'a str, port: &'a str, num_threads: usize) -> ScriptBuilder<'a> {
+impl ScriptBuilder {
+    pub fn new(host: String, port: String, num_threads: usize) -> ScriptBuilder {
         ScriptBuilder {
             host,
             port,
@@ -22,30 +21,29 @@ impl<'a> ScriptBuilder<'a> {
             requests: Vec::new(),
         }
     }
-    pub fn add_header(&mut self, k: &'a str, v: &'a str) {
+    pub fn add_header(&mut self, k: String, v: String) {
         self.headers.push((k, v));
     }
-    pub fn add_request(&mut self, req: Request<'a>) {
+    pub fn add_request(&mut self, req: Request) {
         self.requests.push(req);
     }
     pub fn build(&self) -> Vec<u8> {
-        let mut target: Vec<u8> = Vec::new();
-
-        let mut writer = EmitterConfig::new().create_writer(&mut target);
+        let target: Vec<u8> = Vec::new();
+        let mut writer = EventWriter::new(target);
         let script = root(
-            self.host,
-            self.port,
+            self.host.clone(),
+            self.port.clone(),
             self.headers
                 .iter()
-                .map(|h| (h.0, h.1))
-                .collect::<Vec<(&'a str, &'a str)>>(),
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect::<Vec<(String, String)>>(),
             self.requests
                 .iter()
                 .map(|h| h.clone())
-                .collect::<Vec<Request<'a>>>(),
+                .collect::<Vec<Request>>(),
         );
 
         script.write(&mut writer);
-        target
+        writer.export()
     }
 }

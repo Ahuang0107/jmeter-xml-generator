@@ -1,18 +1,17 @@
-use xml::writer::XmlEvent;
-
 use crate::elements::base::{bool_prop, collection_prop, element_prop, string_prop};
 use crate::script::ScriptElement;
+use crate::xml::XmlEvent;
 
 #[allow(dead_code)]
-pub struct Request<'a> {
-    path: &'a str,
-    method: &'a str,
+pub struct Request {
+    path: String,
+    method: String,
     multipart: bool,
-    args: Vec<(&'a str, &'a str)>,
-    body: Option<&'a str>,
+    args: Vec<(String, String)>,
+    body: Option<String>,
 }
 
-impl<'a> Clone for Request<'a> {
+impl Clone for Request {
     fn clone(&self) -> Self {
         let clone = Request {
             path: self.path.clone(),
@@ -21,8 +20,8 @@ impl<'a> Clone for Request<'a> {
             args: self
                 .args
                 .iter()
-                .map(|h| (h.0, h.1))
-                .collect::<Vec<(&'a str, &'a str)>>(),
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect::<Vec<(String, String)>>(),
             body: self.body.clone(),
         };
         clone
@@ -30,14 +29,14 @@ impl<'a> Clone for Request<'a> {
 }
 
 #[allow(dead_code)]
-impl<'a> Request<'a> {
+impl Request {
     pub fn from(
-        path: &'a str,
-        method: &'a str,
+        path: String,
+        method: String,
         multipart: bool,
-        args: Vec<(&'a str, &'a str)>,
-        body: Option<&'a str>,
-    ) -> Request<'a> {
+        args: Vec<(String, String)>,
+        body: Option<String>,
+    ) -> Request {
         Request {
             path,
             method,
@@ -54,11 +53,11 @@ impl<'a> Request<'a> {
 #[allow(dead_code)]
 pub fn http_sampler_proxy(req: Request) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("HTTPSamplerProxy")
-            .attr("guiclass", "HttpTestSampleGui")
-            .attr("testclass", "HTTPSamplerProxy")
-            .attr("testname", req.path)
-            .attr("enabled", "true"),
+        XmlEvent::start_element("HTTPSamplerProxy".to_string())
+            .attr("guiclass".to_string(), "HttpTestSampleGui".to_string())
+            .attr("testclass".to_string(), "HTTPSamplerProxy".to_string())
+            .attr("testname".to_string(), req.path.clone())
+            .attr("enabled".to_string(), "true".to_string()),
         vec![
             match req.body {
                 Some(data) => arguments(vec![body_json(data)]),
@@ -69,19 +68,19 @@ pub fn http_sampler_proxy(req: Request) -> ScriptElement {
                         .collect::<Vec<ScriptElement>>(),
                 ),
             },
-            string_prop("HTTPSampler.domain", ""),
-            string_prop("HTTPSampler.port", ""),
-            string_prop("HTTPSampler.protocol", ""),
-            string_prop("HTTPSampler.contentEncoding", ""),
-            string_prop("HTTPSampler.path", req.path),
-            string_prop("HTTPSampler.method", req.method),
-            bool_prop("HTTPSampler.follow_redirects", true),
-            bool_prop("HTTPSampler.auto_redirects", false),
-            bool_prop("HTTPSampler.use_keepalive", true),
-            bool_prop("HTTPSampler.DO_MULTIPART_POST", req.multipart),
-            string_prop("HTTPSampler.embedded_url_re", ""),
-            string_prop("HTTPSampler.connect_timeout", ""),
-            string_prop("HTTPSampler.response_timeout", ""),
+            string_prop("HTTPSampler.domain".to_string(), "".to_string()),
+            string_prop("HTTPSampler.port".to_string(), "".to_string()),
+            string_prop("HTTPSampler.protocol".to_string(), "".to_string()),
+            string_prop("HTTPSampler.contentEncoding".to_string(), "".to_string()),
+            string_prop("HTTPSampler.path".to_string(), req.path),
+            string_prop("HTTPSampler.method".to_string(), req.method),
+            bool_prop("HTTPSampler.follow_redirects".to_string(), true),
+            bool_prop("HTTPSampler.auto_redirects".to_string(), false),
+            bool_prop("HTTPSampler.use_keepalive".to_string(), true),
+            bool_prop("HTTPSampler.DO_MULTIPART_POST".to_string(), req.multipart),
+            string_prop("HTTPSampler.embedded_url_re".to_string(), "".to_string()),
+            string_prop("HTTPSampler.connect_timeout".to_string(), "".to_string()),
+            string_prop("HTTPSampler.response_timeout".to_string(), "".to_string()),
         ],
     )
 }
@@ -89,41 +88,41 @@ pub fn http_sampler_proxy(req: Request) -> ScriptElement {
 #[allow(dead_code)]
 fn arguments(args: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("elementProp")
-            .attr("name", "HTTPsampler.Arguments")
-            .attr("elementType", "Arguments")
-            .attr("guiclass", "HTTPArgumentsPanel")
-            .attr("testclass", "Arguments")
-            .attr("testname", "User Defined Variables")
-            .attr("enabled", "true"),
-        vec![collection_prop("Arguments.arguments", args)],
+        XmlEvent::start_element("elementProp".to_string())
+            .attr("name".to_string(), "HTTPsampler.Arguments".to_string())
+            .attr("elementType".to_string(), "Arguments".to_string())
+            .attr("guiclass".to_string(), "HTTPArgumentsPanel".to_string())
+            .attr("testclass".to_string(), "Arguments".to_string())
+            .attr("testname".to_string(), "User Defined Variables".to_string())
+            .attr("enabled".to_string(), "true".to_string()),
+        vec![collection_prop("Arguments.arguments".to_string(), args)],
     )
 }
 
 #[allow(dead_code)]
-fn argument<'a>(name: &'a str, value: &'a str) -> ScriptElement<'a> {
+fn argument(name: String, value: String) -> ScriptElement {
     element_prop(
-        "",
-        "HTTPArgument",
+        "".to_string(),
+        "HTTPArgument".to_string(),
         vec![
-            bool_prop("HTTPArgument.always_encode", true),
-            string_prop("Argument.value", value),
-            string_prop("Argument.metadata", "="),
-            bool_prop("HTTPArgument.use_equals", true),
-            string_prop("Argument.name", name),
+            bool_prop("HTTPArgument.always_encode".to_string(), true),
+            string_prop("Argument.value".to_string(), value),
+            string_prop("Argument.metadata".to_string(), "=".to_string()),
+            bool_prop("HTTPArgument.use_equals".to_string(), true),
+            string_prop("Argument.name".to_string(), name),
         ],
     )
 }
 
 #[allow(dead_code)]
-fn body_json(value: &str) -> ScriptElement {
+fn body_json(value: String) -> ScriptElement {
     element_prop(
-        "",
-        "HTTPArgument",
+        "".to_string(),
+        "HTTPArgument".to_string(),
         vec![
-            bool_prop("HTTPArgument.always_encode", false),
-            string_prop("Argument.value", value),
-            string_prop("Argument.metadata", "="),
+            bool_prop("HTTPArgument.always_encode".to_string(), false),
+            string_prop("Argument.value".to_string(), value),
+            string_prop("Argument.metadata".to_string(), "=".to_string()),
         ],
     )
 }

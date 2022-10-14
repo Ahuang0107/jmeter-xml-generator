@@ -10,4 +10,3 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 wasm-bindgen = "0.2.83"
-xml-rs = "0.8.4"
