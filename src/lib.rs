@@ -28,7 +28,7 @@ mod tests {
     use std::io::Write;
 
     use crate::builder::ScriptBuilder;
-    use crate::elements::Request;
+    use crate::elements::{KeyValue, Request};
 
     #[test]
     fn test() {
@@ -41,33 +41,38 @@ mod tests {
         );
         script_builder.add_request(Request::from(
             "/endpoint/admin_user/login".to_string(),
-            "post".to_string(),
+            "POST".to_string(),
             true,
-            vec![
-                ("username".to_string(), "smarthubdev".to_string()),
-                ("password".to_string(), "smarthub@1234".to_string()),
-            ],
+            serde_json::to_string::<Vec<KeyValue>>(&vec![
+                KeyValue::from("username".to_string(), "smarthubdev".to_string()),
+                KeyValue::from("password".to_string(), "smarthub".to_string()),
+            ])
+            .unwrap(),
             None,
         ));
         script_builder.add_request(Request::from(
             "/endpoint/basic/data_dictionary/bu_list".to_string(),
-            "get".to_string(),
+            "GET".to_string(),
             false,
-            vec![],
+            serde_json::to_string::<Vec<KeyValue>>(&vec![]).unwrap(),
             None,
         ));
         script_builder.add_request(Request::from(
             "/endpoint/basic/data_dictionary/list".to_string(),
-            "get".to_string(),
+            "GET".to_string(),
             false,
-            vec![("type".to_string(), "4".to_string())],
+            serde_json::to_string::<Vec<KeyValue>>(&vec![KeyValue::from(
+                "type".to_string(),
+                "4".to_string(),
+            )])
+            .unwrap(),
             None,
         ));
         script_builder.add_request(Request::from(
             "/endpoint/erp/budget/page".to_string(),
-            "post".to_string(),
+            "POST".to_string(),
             false,
-            vec![],
+            serde_json::to_string::<Vec<KeyValue>>(&vec![]).unwrap(),
             Some("{\"current\":1,\"size\":15,\"status\":0}".to_string()),
         ));
         let target = script_builder.build();

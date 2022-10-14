@@ -1,7 +1,10 @@
+use wasm_bindgen::prelude::*;
+
 use crate::elements::{root, Request};
 use crate::xml::EventWriter;
 
 #[allow(dead_code)]
+#[wasm_bindgen]
 pub struct ScriptBuilder {
     host: String,
     port: String,
@@ -11,6 +14,7 @@ pub struct ScriptBuilder {
 }
 
 #[allow(dead_code)]
+#[wasm_bindgen]
 impl ScriptBuilder {
     pub fn new(host: String, port: String, num_threads: usize) -> ScriptBuilder {
         ScriptBuilder {

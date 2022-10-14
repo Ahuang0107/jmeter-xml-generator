@@ -106,7 +106,7 @@ impl fmt::Display for EmitterError {
         write!(f, "emitter error: ")?;
         match *self {
             EmitterError::Io(ref e) => write!(f, "I/O error: {}", e),
-            ref other => write!(f, "{}", other.description()),
+            ref other => write!(f, "{}", other.to_string()),
         }
     }
 }
@@ -125,6 +125,7 @@ impl Error for EmitterError {
 pub type Result<T> = result::Result<T, EmitterError>;
 
 pub enum XmlEvent {
+    #[allow(dead_code)]
     StartDocument,
     StartElement {
         name: String,

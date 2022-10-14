@@ -1,13 +1,17 @@
-use crate::elements::base::{bool_prop, collection_prop, element_prop, string_prop};
+use wasm_bindgen::prelude::*;
+
+use crate::elements::base::{arguments, bool_prop, element_prop, string_prop};
+use crate::elements::KeyValue;
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
 #[allow(dead_code)]
+#[wasm_bindgen]
 pub struct Request {
     path: String,
     method: String,
     multipart: bool,
-    args: Vec<(String, String)>,
+    args: Vec<KeyValue>,
     body: Option<String>,
 }
 
@@ -17,11 +21,7 @@ impl Clone for Request {
             path: self.path.clone(),
             method: self.method.clone(),
             multipart: self.multipart.clone(),
-            args: self
-                .args
-                .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect::<Vec<(String, String)>>(),
+            args: self.args.clone(),
             body: self.body.clone(),
         };
         clone
@@ -29,24 +29,25 @@ impl Clone for Request {
 }
 
 #[allow(dead_code)]
+#[wasm_bindgen]
 impl Request {
     pub fn from(
         path: String,
         method: String,
         multipart: bool,
-        args: Vec<(String, String)>,
+        args: String,
         body: Option<String>,
     ) -> Request {
         Request {
             path,
             method,
             multipart,
-            args,
+            args: serde_json::from_str::<Vec<KeyValue>>(&args).unwrap(),
             body,
         }
     }
     pub fn with_json(&self) -> bool {
-        self.method == "post" && self.body.is_some()
+        self.method == "POST" && self.body.is_some()
     }
 }
 
@@ -64,7 +65,7 @@ pub fn http_sampler_proxy(req: Request) -> ScriptElement {
                 None => arguments(
                     req.args
                         .into_iter()
-                        .map(|a| argument(a.0, a.1))
+                        .map(|a| argument(a.key, a.value))
                         .collect::<Vec<ScriptElement>>(),
                 ),
             },
@@ -82,20 +83,6 @@ pub fn http_sampler_proxy(req: Request) -> ScriptElement {
             string_prop("HTTPSampler.connect_timeout".to_string(), "".to_string()),
             string_prop("HTTPSampler.response_timeout".to_string(), "".to_string()),
         ],
-    )
-}
-
-#[allow(dead_code)]
-fn arguments(args: Vec<ScriptElement>) -> ScriptElement {
-    ScriptElement::from(
-        XmlEvent::start_element("elementProp".to_string())
-            .attr("name".to_string(), "HTTPsampler.Arguments".to_string())
-            .attr("elementType".to_string(), "Arguments".to_string())
-            .attr("guiclass".to_string(), "HTTPArgumentsPanel".to_string())
-            .attr("testclass".to_string(), "Arguments".to_string())
-            .attr("testname".to_string(), "User Defined Variables".to_string())
-            .attr("enabled".to_string(), "true".to_string()),
-        vec![collection_prop("Arguments.arguments".to_string(), args)],
     )
 }
 

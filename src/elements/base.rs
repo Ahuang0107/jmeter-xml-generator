@@ -78,3 +78,17 @@ pub(crate) fn bool(k: String, v: bool) -> ScriptElement {
         },
     )
 }
+
+#[allow(dead_code)]
+pub(crate) fn arguments(args: Vec<ScriptElement>) -> ScriptElement {
+    ScriptElement::from(
+        XmlEvent::start_element("elementProp".to_string())
+            .attr("name".to_string(), "HTTPsampler.Arguments".to_string())
+            .attr("elementType".to_string(), "Arguments".to_string())
+            .attr("guiclass".to_string(), "HTTPArgumentsPanel".to_string())
+            .attr("testclass".to_string(), "Arguments".to_string())
+            .attr("testname".to_string(), "User Defined Variables".to_string())
+            .attr("enabled".to_string(), "true".to_string()),
+        vec![collection_prop("Arguments.arguments".to_string(), args)],
+    )
+}

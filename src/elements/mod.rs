@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::elements::config::{config_test_element, cookie_manager, header_manager};
 use crate::elements::http::http_sampler_proxy;
 pub(crate) use crate::elements::http::Request;
@@ -11,6 +13,19 @@ mod config;
 mod http;
 mod listeners;
 mod threads;
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct KeyValue {
+    key: String,
+    value: String,
+}
+
+impl KeyValue {
+    #[allow(dead_code)]
+    pub fn from(key: String, value: String) -> KeyValue {
+        KeyValue { key, value }
+    }
+}
 
 #[allow(dead_code)]
 pub fn root(

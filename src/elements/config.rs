@@ -1,4 +1,4 @@
-use crate::elements::base::{bool_prop, collection_prop, element_prop, string_prop};
+use crate::elements::base::{arguments, bool_prop, collection_prop, element_prop, string_prop};
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
@@ -66,19 +66,5 @@ pub(crate) fn header(name: String, value: String) -> ScriptElement {
             string_prop("Header.name".to_string(), name),
             string_prop("Header.value".to_string(), value),
         ],
-    )
-}
-
-#[allow(dead_code)]
-fn arguments(args: Vec<ScriptElement>) -> ScriptElement {
-    ScriptElement::from(
-        XmlEvent::start_element("elementProp".to_string())
-            .attr("name".to_string(), "HTTPsampler.Arguments".to_string())
-            .attr("elementType".to_string(), "Arguments".to_string())
-            .attr("guiclass".to_string(), "HTTPArgumentsPanel".to_string())
-            .attr("testclass".to_string(), "Arguments".to_string())
-            .attr("testname".to_string(), "User Defined Variables".to_string())
-            .attr("enabled".to_string(), "true".to_string()),
-        vec![collection_prop("Arguments.arguments".to_string(), args)],
     )
 }
