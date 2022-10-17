@@ -27,41 +27,41 @@ import {Request, ScriptBuilder} from "jmeter-xml-generator";
 // 500 is threads number
 const scriptBuilder = ScriptBuilder.new("custom host", "custom post", 500);
 scriptBuilder.add_header("header key", "header value");
-// GET request
-scriptBuilder.add_request(
-    Request.from(
-        "request url",
-        "request method(get)",
-        false,
-        JSON.stringify([
-            {key: "query string parameter key", value: "query string parameter value"},
-        ])
-    )
+// GET request (delay 300 milliseconds)
+scriptBuilder.get(
+    "request url",
+    JSON.stringify([
+        {key: "query string parameter key", value: "query string parameter value"},
+    ]),
+    300
 );
 // POST request with multipart data
-scriptBuilder.add_request(
-    Request.from(
-        "request url",
-        "request method(post)",
-        true,
-        JSON.stringify([
-            {key: "query string parameter key", value: "query string parameter value"},
-        ])
-    )
+scriptBuilder.post_with_form_data(
+    "request url",
+    JSON.stringify([
+        {key: "query string parameter key", value: "query string parameter value"},
+    ]),
+    300
 );
 // POST request with json body
-scriptBuilder.add_request(
-    Request.from(
-        "request url",
-        "request method(post)",
-        false,
-        JSON.stringify([]),
-        JSON.stringify({
-            current: 1,
-            size: 15,
-            status: 0,
-        })
-    )
+scriptBuilder.post(
+    "request url",
+    JSON.stringify({
+        current: 1,
+        size: 15,
+        status: 0,
+    }),
+    300
+);
+// PUT request with json body
+scriptBuilder.put(
+    "request url",
+    JSON.stringify({
+        current: 1,
+        size: 15,
+        status: 0,
+    }),
+    300
 );
 
 const result = scriptBuilder.build();
