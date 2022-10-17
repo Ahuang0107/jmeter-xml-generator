@@ -68,3 +68,18 @@ pub(crate) fn header(name: String, value: String) -> ScriptElement {
         ],
     )
 }
+
+#[allow(dead_code)]
+pub(crate) fn constant_timer(delay: usize) -> ScriptElement {
+    ScriptElement::from(
+        XmlEvent::start_element("ConstantTimer".to_string())
+            .attr("guiclass".to_string(), "ConstantTimerGui".to_string())
+            .attr("testclass".to_string(), "ConstantTimer".to_string())
+            .attr("testname".to_string(), "Constant Timer".to_string())
+            .attr("enabled".to_string(), "true".to_string()),
+        vec![string_prop(
+            "ConstantTimer.delay".to_string(),
+            delay.to_string(),
+        )],
+    )
+}

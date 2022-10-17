@@ -47,10 +47,12 @@ mod tests {
                 KeyValue::from("password".to_string(), "smarthub".to_string()),
             ])
             .unwrap(),
+            0,
         );
         script_builder.get(
             "/endpoint/basic/data_dictionary/bu_list".to_string(),
             serde_json::to_string::<Vec<KeyValue>>(&vec![]).unwrap(),
+            0,
         );
         script_builder.get(
             "/endpoint/basic/data_dictionary/list".to_string(),
@@ -59,14 +61,17 @@ mod tests {
                 "4".to_string(),
             )])
             .unwrap(),
+            0,
         );
         script_builder.post(
             "/endpoint/erp/budget/page".to_string(),
             "{\"current\":1,\"size\":15,\"status\":0}".to_string(),
+            1000,
         );
         script_builder.put(
             "/endpoint/staffing/19".to_string(),
             "{\"current\":1,\"size\":15,\"status\":0}".to_string(),
+            1000,
         );
         let target = script_builder.build();
 
