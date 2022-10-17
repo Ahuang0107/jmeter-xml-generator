@@ -1,6 +1,6 @@
 use wasm_bindgen::prelude::*;
 
-use crate::elements::{root, Request};
+use crate::elements::root;
 use crate::xml::EventWriter;
 
 #[allow(dead_code)]
@@ -10,7 +10,18 @@ pub struct ScriptBuilder {
     port: String,
     num_threads: usize,
     headers: Vec<(String, String)>,
-    requests: Vec<Request>,
+    requests: Vec<(Request, String)>,
+}
+
+#[allow(dead_code)]
+#[derive(Clone)]
+pub enum Request {
+    GET(String),
+    POST {
+        payload: String,
+        with_form_data: bool,
+    },
+    PUT(String),
 }
 
 #[allow(dead_code)]
@@ -28,8 +39,32 @@ impl ScriptBuilder {
     pub fn add_header(&mut self, k: String, v: String) {
         self.headers.push((k, v));
     }
-    pub fn add_request(&mut self, req: Request) {
-        self.requests.push(req);
+    fn add_request(&mut self, req: Request, url: String) {
+        self.requests.push((req, url));
+    }
+    pub fn get(&mut self, url: String, payload: String) {
+        self.add_request(Request::GET(payload), url)
+    }
+    pub fn post(&mut self, url: String, payload: String) {
+        self.add_request(
+            Request::POST {
+                payload,
+                with_form_data: false,
+            },
+            url,
+        )
+    }
+    pub fn post_with_form_data(&mut self, url: String, payload: String) {
+        self.add_request(
+            Request::POST {
+                payload,
+                with_form_data: true,
+            },
+            url,
+        )
+    }
+    pub fn put(&mut self, url: String, payload: String) {
+        self.add_request(Request::PUT(payload), url)
     }
     pub fn build(&self) -> Vec<u8> {
         let target: Vec<u8> = Vec::new();
@@ -43,8 +78,8 @@ impl ScriptBuilder {
                 .collect::<Vec<(String, String)>>(),
             self.requests
                 .iter()
-                .map(|h| h.clone())
-                .collect::<Vec<Request>>(),
+                .map(|(k, v)| (k.clone(), v.clone()))
+                .collect::<Vec<(Request, String)>>(),
         );
 
         script.write(&mut writer);

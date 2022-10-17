@@ -1,8 +1,6 @@
-use serde::{Deserialize, Serialize};
-
+use crate::builder::Request;
 use crate::elements::config::{config_test_element, cookie_manager, header_manager};
 use crate::elements::http::http_sampler_proxy;
-pub(crate) use crate::elements::http::Request;
 use crate::elements::listeners::result_collector;
 use crate::elements::threads::thread_group;
 use crate::script::ScriptElement;
@@ -14,30 +12,17 @@ mod http;
 mod listeners;
 mod threads;
 
-#[derive(Serialize, Deserialize, Clone)]
-pub struct KeyValue {
-    key: String,
-    value: String,
-}
-
-impl KeyValue {
-    #[allow(dead_code)]
-    pub fn from(key: String, value: String) -> KeyValue {
-        KeyValue { key, value }
-    }
-}
-
 #[allow(dead_code)]
 pub fn root(
     host: String,
     port: String,
     headers: Vec<(String, String)>,
-    requests: Vec<Request>,
+    requests: Vec<(Request, String)>,
 ) -> ScriptElement {
     let mut request_scripts: Vec<ScriptElement> = vec![];
-    requests.into_iter().for_each(|req| {
-        let with_json = req.with_json();
-        request_scripts.push(http_sampler_proxy(req));
+    requests.into_iter().for_each(|(req, url)| {
+        let with_json = req.is_post() && !req.with_form_data();
+        request_scripts.push(http_sampler_proxy(req, url));
         if with_json {
             request_scripts.push(ScriptElement::from(
                 XmlEvent::start_element("hashTree".to_string()),

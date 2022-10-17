@@ -3,6 +3,7 @@ use wasm_bindgen::prelude::*;
 mod builder;
 mod elements;
 mod script;
+mod utils;
 mod xml;
 
 #[wasm_bindgen]
@@ -28,7 +29,7 @@ mod tests {
     use std::io::Write;
 
     use crate::builder::ScriptBuilder;
-    use crate::elements::{KeyValue, Request};
+    use crate::utils::KeyValue;
 
     #[test]
     fn test() {
@@ -39,42 +40,34 @@ mod tests {
             "test".to_string(),
             "7EBZfzzrPWHBmXJtl#86LDs6varwXlYF".to_string(),
         );
-        script_builder.add_request(Request::from(
+        script_builder.post_with_form_data(
             "/endpoint/admin_user/login".to_string(),
-            "POST".to_string(),
-            true,
             serde_json::to_string::<Vec<KeyValue>>(&vec![
                 KeyValue::from("username".to_string(), "smarthubdev".to_string()),
                 KeyValue::from("password".to_string(), "smarthub".to_string()),
             ])
             .unwrap(),
-            None,
-        ));
-        script_builder.add_request(Request::from(
+        );
+        script_builder.get(
             "/endpoint/basic/data_dictionary/bu_list".to_string(),
-            "GET".to_string(),
-            false,
             serde_json::to_string::<Vec<KeyValue>>(&vec![]).unwrap(),
-            None,
-        ));
-        script_builder.add_request(Request::from(
+        );
+        script_builder.get(
             "/endpoint/basic/data_dictionary/list".to_string(),
-            "GET".to_string(),
-            false,
             serde_json::to_string::<Vec<KeyValue>>(&vec![KeyValue::from(
                 "type".to_string(),
                 "4".to_string(),
             )])
             .unwrap(),
-            None,
-        ));
-        script_builder.add_request(Request::from(
+        );
+        script_builder.post(
             "/endpoint/erp/budget/page".to_string(),
-            "POST".to_string(),
-            false,
-            serde_json::to_string::<Vec<KeyValue>>(&vec![]).unwrap(),
-            Some("{\"current\":1,\"size\":15,\"status\":0}".to_string()),
-        ));
+            "{\"current\":1,\"size\":15,\"status\":0}".to_string(),
+        );
+        script_builder.put(
+            "/endpoint/staffing/19".to_string(),
+            "{\"current\":1,\"size\":15,\"status\":0}".to_string(),
+        );
         let target = script_builder.build();
 
         let mut file = File::create("temp/file.jmx".to_string()).expect("");
