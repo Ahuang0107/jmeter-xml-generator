@@ -34,20 +34,13 @@ pub fn root(
                 "Content-Type".to_string(),
                 "application/json".to_string(),
             )]));
-            hash_tree_children.push(ScriptElement::from_empty(XmlEvent::start_element(
-                "hashTree".to_string(),
-            )));
+            hash_tree_children.push(hash_tree(vec![]));
         }
         if delay_time > 0 {
             hash_tree_children.push(constant_timer(delay_time));
-            hash_tree_children.push(ScriptElement::from_empty(XmlEvent::start_element(
-                "hashTree".to_string(),
-            )));
+            hash_tree_children.push(hash_tree(vec![]));
         }
-        request_scripts.push(ScriptElement::from(
-            XmlEvent::start_element("hashTree".to_string()),
-            hash_tree_children,
-        ));
+        request_scripts.push(hash_tree(hash_tree_children));
     });
     ScriptElement::from(
         XmlEvent::start_element("jmeterTestPlan".to_string())
