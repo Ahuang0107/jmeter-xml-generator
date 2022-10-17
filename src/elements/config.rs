@@ -11,7 +11,7 @@ pub(crate) fn config_test_element(host: String, port: String) -> ScriptElement {
             .attr("testname".to_string(), "HTTP Request Defaults".to_string())
             .attr("enabled".to_string(), "true".to_string()),
         vec![
-            arguments(vec![]),
+            arguments("HTTPsampler.Arguments".to_string(), vec![]),
             string_prop("HTTPSampler.domain".to_string(), host),
             string_prop("HTTPSampler.port".to_string(), port),
             string_prop("HTTPSampler.protocol".to_string(), "".to_string()),

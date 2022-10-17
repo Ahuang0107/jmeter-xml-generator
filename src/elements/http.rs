@@ -49,15 +49,22 @@ pub fn http_sampler_proxy(request: Request, request_url: String) -> ScriptElemen
             .attr("enabled".to_string(), "true".to_string()),
         vec![
             match request {
-                Request::GET(payload) => arguments(vec![body_json(payload)]),
+                Request::GET(payload) => arguments(
+                    "HTTPsampler.Arguments".to_string(),
+                    vec![body_json(payload)],
+                ),
                 Request::POST {
                     payload,
                     with_form_data,
                 } => {
                     if !with_form_data {
-                        arguments(vec![body_json(payload)])
+                        arguments(
+                            "HTTPsampler.Arguments".to_string(),
+                            vec![body_json(payload)],
+                        )
                     } else {
                         arguments(
+                            "HTTPsampler.Arguments".to_string(),
                             serde_json::from_str::<Vec<KeyValue>>(payload.as_str())
                                 .unwrap()
                                 .into_iter()
@@ -66,7 +73,10 @@ pub fn http_sampler_proxy(request: Request, request_url: String) -> ScriptElemen
                         )
                     }
                 }
-                Request::PUT(payload) => arguments(vec![body_json(payload)]),
+                Request::PUT(payload) => arguments(
+                    "HTTPsampler.Arguments".to_string(),
+                    vec![body_json(payload)],
+                ),
             },
             string_prop("HTTPSampler.domain".to_string(), "".to_string()),
             string_prop("HTTPSampler.port".to_string(), "".to_string()),
