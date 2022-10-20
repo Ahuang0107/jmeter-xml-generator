@@ -35,6 +35,16 @@ impl Request {
             Request::PUT(_) => false,
         }
     }
+    pub fn is_put(&self) -> bool {
+        match self {
+            Request::GET(_) => false,
+            Request::POST {
+                payload: _payload,
+                with_form_data: _with_form_data,
+            } => false,
+            Request::PUT(_) => true,
+        }
+    }
 }
 
 #[allow(dead_code)]
@@ -51,7 +61,11 @@ pub fn http_sampler_proxy(request: Request, request_url: String) -> ScriptElemen
             match request {
                 Request::GET(payload) => arguments(
                     "HTTPsampler.Arguments".to_string(),
-                    vec![body_json(payload)],
+                    serde_json::from_str::<Vec<KeyValue>>(payload.as_str())
+                        .unwrap()
+                        .into_iter()
+                        .map(|kv| argument(kv.key, kv.value))
+                        .collect::<Vec<ScriptElement>>(),
                 ),
                 Request::POST {
                     payload,

@@ -68,9 +68,24 @@ mod tests {
             "{\"current\":1,\"size\":15,\"status\":0}".to_string(),
             1000,
         );
+        script_builder.get(
+            "/endpoint/staffing/page".to_string(),
+            serde_json::to_string::<Vec<KeyValue>>(&vec![
+                KeyValue::from("financeYear".to_string(), "2023".to_string()),
+                KeyValue::from("current".to_string(), "1".to_string()),
+                KeyValue::from("size".to_string(), "15".to_string()),
+            ])
+            .unwrap(),
+            1000,
+        );
+        script_builder.get(
+            "/endpoint/staffing/12/detail".to_string(),
+            serde_json::to_string::<Vec<KeyValue>>(&vec![]).unwrap(),
+            1000,
+        );
         script_builder.put(
-            "/endpoint/staffing/19".to_string(),
-            "{\"current\":1,\"size\":15,\"status\":0}".to_string(),
+            "/endpoint/staffing/12".to_string(),
+            "{\"stage\":\"PENDING_RMA_REVIEW\"}".to_string(),
             1000,
         );
         let target = script_builder.build();

@@ -26,7 +26,7 @@ pub fn root(
 ) -> ScriptElement {
     let mut request_scripts: Vec<ScriptElement> = vec![];
     requests.into_iter().for_each(|(req, url, delay_time)| {
-        let with_json = req.is_post() && !req.with_form_data();
+        let with_json = (req.is_post() || req.is_put()) && !req.with_form_data();
         request_scripts.push(http_sampler_proxy(req, url));
         let mut hash_tree_children: Vec<ScriptElement> = vec![];
         if with_json {
