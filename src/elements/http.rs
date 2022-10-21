@@ -62,7 +62,7 @@ pub fn http_sampler_proxy(request: Request, request_url: String) -> ScriptElemen
                 Request::GET(payload) => arguments(
                     "HTTPsampler.Arguments".to_string(),
                     serde_json::from_str::<Vec<KeyValue>>(payload.as_str())
-                        .unwrap()
+                        .unwrap_or(vec![])
                         .into_iter()
                         .map(|kv| argument(kv.key, kv.value))
                         .collect::<Vec<ScriptElement>>(),
