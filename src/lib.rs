@@ -33,8 +33,18 @@ mod tests {
 
     #[test]
     fn test() {
-        let mut script_builder =
-            ScriptBuilder::new("192.168.206.112".to_string(), "8080".to_string(), 2);
+        let mut script_builder = ScriptBuilder::new(
+            "192.168.206.112".to_string(),
+            "8080".to_string(),
+            500,
+            1,
+            serde_json::to_string::<Vec<String>>(&vec![
+                "CNSHAVMPSMHAP01.ey.net".to_string(),
+                "CNSHAVMPSMHAP02.ey.net".to_string(),
+                "CNSHAVMPSMHDB01.ey.net".to_string(),
+            ])
+            .unwrap(),
+        );
         script_builder.add_header("appCode".to_string(), "resource".to_string());
         script_builder.add_header(
             "test".to_string(),

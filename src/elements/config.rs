@@ -3,33 +3,33 @@ use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
 #[allow(dead_code)]
-pub(crate) fn config_test_element(host: String, port: String) -> ScriptElement {
+pub(crate) fn config_test_element(host: &str, port: &str) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("ConfigTestElement".to_string())
-            .attr("guiclass".to_string(), "HttpDefaultsGui".to_string())
-            .attr("testclass".to_string(), "ConfigTestElement".to_string())
-            .attr("testname".to_string(), "HTTP Request Defaults".to_string())
-            .attr("enabled".to_string(), "true".to_string()),
+        XmlEvent::start_element("ConfigTestElement")
+            .attr("guiclass", "HttpDefaultsGui")
+            .attr("testclass", "ConfigTestElement")
+            .attr("testname", "HTTP Request Defaults")
+            .attr("enabled", "true"),
         vec![
-            arguments("HTTPsampler.Arguments".to_string(), vec![]),
-            string_prop("HTTPSampler.domain".to_string(), host),
-            string_prop("HTTPSampler.port".to_string(), port),
-            string_prop("HTTPSampler.protocol".to_string(), "".to_string()),
-            string_prop("HTTPSampler.response_timeout".to_string(), "".to_string()),
+            arguments("HTTPsampler.Arguments", vec![]),
+            string_prop("HTTPSampler.domain", host),
+            string_prop("HTTPSampler.port", port),
+            string_prop("HTTPSampler.protocol", ""),
+            string_prop("HTTPSampler.response_timeout", ""),
         ],
     )
 }
 
 #[allow(dead_code)]
-pub(crate) fn header_manager(headers: Vec<(String, String)>) -> ScriptElement {
+pub(crate) fn header_manager(headers: Vec<(&str, &str)>) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("HeaderManager".to_string())
-            .attr("guiclass".to_string(), "HeaderPanel".to_string())
-            .attr("testclass".to_string(), "HeaderManager".to_string())
-            .attr("testname".to_string(), "HTTP Header Manager".to_string())
-            .attr("enabled".to_string(), "true".to_string()),
+        XmlEvent::start_element("HeaderManager")
+            .attr("guiclass", "HeaderPanel")
+            .attr("testclass", "HeaderManager")
+            .attr("testname", "HTTP Header Manager")
+            .attr("enabled", "true"),
         vec![collection_prop(
-            "HeaderManager.headers".to_string(),
+            "HeaderManager.headers",
             headers
                 .into_iter()
                 .map(|a| header(a.0, a.1))
@@ -41,30 +41,29 @@ pub(crate) fn header_manager(headers: Vec<(String, String)>) -> ScriptElement {
 #[allow(dead_code)]
 pub(crate) fn cookie_manager() -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("CookieManager".to_string())
-            .attr("guiclass".to_string(), "CookiePanel".to_string())
-            .attr("testclass".to_string(), "CookieManager".to_string())
-            .attr("testname".to_string(), "HTTP Cookie Manager".to_string())
-            .attr("enabled".to_string(), "true".to_string()),
+        XmlEvent::start_element("CookieManager")
+            .attr("guiclass", "CookiePanel")
+            .attr("testclass", "CookieManager")
+            .attr("testname", "HTTP Cookie Manager")
+            .attr("enabled", "true"),
         vec![
             ScriptElement::from_empty(
-                XmlEvent::start_element("collectionProp".to_string())
-                    .attr("name".to_string(), "CookieManager.cookies".to_string()),
+                XmlEvent::start_element("collectionProp").attr("name", "CookieManager.cookies"),
             ),
-            bool_prop("CookieManager.clearEachIteration".to_string(), false),
-            bool_prop("CookieManager.controlledByThreadGroup".to_string(), false),
+            bool_prop("CookieManager.clearEachIteration", false),
+            bool_prop("CookieManager.controlledByThreadGroup", false),
         ],
     )
 }
 
 #[allow(dead_code)]
-pub(crate) fn header(name: String, value: String) -> ScriptElement {
+pub(crate) fn header(name: &str, value: &str) -> ScriptElement {
     element_prop(
-        "".to_string(),
-        "Header".to_string(),
+        "",
+        "Header",
         vec![
-            string_prop("Header.name".to_string(), name),
-            string_prop("Header.value".to_string(), value),
+            string_prop("Header.name", name),
+            string_prop("Header.value", value),
         ],
     )
 }
@@ -72,14 +71,14 @@ pub(crate) fn header(name: String, value: String) -> ScriptElement {
 #[allow(dead_code)]
 pub(crate) fn constant_timer(delay: usize) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("ConstantTimer".to_string())
-            .attr("guiclass".to_string(), "ConstantTimerGui".to_string())
-            .attr("testclass".to_string(), "ConstantTimer".to_string())
-            .attr("testname".to_string(), "Constant Timer".to_string())
-            .attr("enabled".to_string(), "true".to_string()),
+        XmlEvent::start_element("ConstantTimer")
+            .attr("guiclass", "ConstantTimerGui")
+            .attr("testclass", "ConstantTimer")
+            .attr("testname", "Constant Timer")
+            .attr("enabled", "true"),
         vec![string_prop(
-            "ConstantTimer.delay".to_string(),
-            delay.to_string(),
+            "ConstantTimer.delay",
+            delay.to_string().as_str(),
         )],
     )
 }

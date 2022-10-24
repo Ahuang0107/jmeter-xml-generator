@@ -2,98 +2,88 @@ use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
 #[allow(dead_code)]
-pub(crate) fn string_prop(name: String, value: String) -> ScriptElement {
+pub(crate) fn string_prop(name: &str, value: &str) -> ScriptElement {
     ScriptElement::from_str(
-        XmlEvent::start_element("stringProp".to_string()).attr("name".to_string(), name),
+        XmlEvent::start_element("stringProp").attr("name", name),
         value,
     )
 }
 
 #[allow(dead_code)]
-pub(crate) fn bool_prop(name: String, value: bool) -> ScriptElement {
+pub(crate) fn long_prop(name: &str, value: usize) -> ScriptElement {
     ScriptElement::from_str(
-        XmlEvent::start_element("boolProp".to_string()).attr("name".to_string(), name),
-        if value {
-            "true".to_string()
-        } else {
-            "false".to_string()
-        },
+        XmlEvent::start_element("longProp").attr("name", name),
+        value.to_string().as_str(),
     )
 }
 
 #[allow(dead_code)]
-pub(crate) fn collection_prop(name: String, value: Vec<ScriptElement>) -> ScriptElement {
+pub(crate) fn bool_prop(name: &str, value: bool) -> ScriptElement {
+    ScriptElement::from_str(
+        XmlEvent::start_element("boolProp").attr("name", name),
+        if value { "true" } else { "false" },
+    )
+}
+
+#[allow(dead_code)]
+pub(crate) fn collection_prop(name: &str, value: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("collectionProp".to_string()).attr("name".to_string(), name),
+        XmlEvent::start_element("collectionProp").attr("name", name),
         value,
     )
 }
 
 #[allow(dead_code)]
-pub(crate) fn element_prop(
-    name: String,
-    e_type: String,
-    value: Vec<ScriptElement>,
-) -> ScriptElement {
+pub(crate) fn element_prop(name: &str, e_type: &str, value: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("elementProp".to_string())
-            .attr("name".to_string(), name)
-            .attr("elementType".to_string(), e_type),
+        XmlEvent::start_element("elementProp")
+            .attr("name", name)
+            .attr("elementType", e_type),
         value,
     )
 }
 
 #[allow(dead_code)]
-pub(crate) fn obj_prop(name: String, value: ScriptElement) -> ScriptElement {
+pub(crate) fn obj_prop(name: &str, value: ScriptElement) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("objProp".to_string()),
+        XmlEvent::start_element("objProp"),
         vec![
-            ScriptElement::from_str(XmlEvent::start_element("name".to_string()), name),
+            ScriptElement::from_str(XmlEvent::start_element("name"), name),
             value,
         ],
     )
 }
 
 #[allow(dead_code)]
-pub(crate) fn value(class: String, v: Vec<ScriptElement>) -> ScriptElement {
-    ScriptElement::from(
-        XmlEvent::start_element("value".to_string()).attr("class".to_string(), class),
-        v,
-    )
+pub(crate) fn value(class: &str, v: Vec<ScriptElement>) -> ScriptElement {
+    ScriptElement::from(XmlEvent::start_element("value").attr("class", class), v)
 }
 
 #[allow(dead_code)]
-pub(crate) fn string(k: String, v: String) -> ScriptElement {
+pub(crate) fn string(k: &str, v: &str) -> ScriptElement {
     ScriptElement::from_str(XmlEvent::start_element(k), v)
 }
 
 #[allow(dead_code)]
-pub(crate) fn bool(k: String, v: bool) -> ScriptElement {
-    string(
-        k,
-        if v {
-            "true".to_string()
-        } else {
-            "false".to_string()
-        },
-    )
+pub(crate) fn bool(k: &str, v: bool) -> ScriptElement {
+    string(k, if v { "true" } else { "false" })
 }
 
 #[allow(dead_code)]
-pub(crate) fn arguments(name: String, args: Vec<ScriptElement>) -> ScriptElement {
+pub(crate) fn arguments(name: &str, args: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from(
-        XmlEvent::start_element("elementProp".to_string())
-            .attr("name".to_string(), name)
-            .attr("elementType".to_string(), "Arguments".to_string())
-            .attr("guiclass".to_string(), "HTTPArgumentsPanel".to_string())
-            .attr("testclass".to_string(), "Arguments".to_string())
-            .attr("testname".to_string(), "User Defined Variables".to_string())
-            .attr("enabled".to_string(), "true".to_string()),
-        vec![collection_prop("Arguments.arguments".to_string(), args)],
+        XmlEvent::start_element("elementProp")
+            .attr("name", name)
+            .attr("elementType", "Arguments")
+            .attr("guiclass", "HTTPArgumentsPanel")
+            .attr("testclass", "Arguments")
+            .attr("testname", "User Defined Variables")
+            .attr("enabled", "true"),
+        vec![collection_prop("Arguments.arguments", args)],
     )
 }
 
 #[allow(dead_code)]
 pub(crate) fn hash_tree(children: Vec<ScriptElement>) -> ScriptElement {
-    ScriptElement::from(XmlEvent::start_element("hashTree".to_string()), children)
+    ScriptElement::from(XmlEvent::start_element("hashTree"), children)
 }

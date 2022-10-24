@@ -138,9 +138,9 @@ pub enum XmlEvent {
 }
 
 impl XmlEvent {
-    pub fn start_element(name: String) -> StartElementBuilder {
+    pub fn start_element(name: &str) -> StartElementBuilder {
         StartElementBuilder {
-            name,
+            name: name.to_string(),
             attributes: Vec::new(),
         }
     }
@@ -158,8 +158,8 @@ pub struct StartElementBuilder {
 }
 
 impl StartElementBuilder {
-    pub fn attr(mut self, name: String, value: String) -> StartElementBuilder {
-        self.attributes.push((name, value));
+    pub fn attr(mut self, name: &str, value: &str) -> StartElementBuilder {
+        self.attributes.push((name.to_string(), value.to_string()));
         self
     }
     pub fn name(&self) -> String {

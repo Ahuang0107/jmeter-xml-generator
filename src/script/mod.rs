@@ -16,10 +16,10 @@ impl ScriptElement {
         }
     }
     #[allow(dead_code)]
-    pub fn from_str(start: StartElementBuilder, child: String) -> ScriptElement {
+    pub fn from_str(start: StartElementBuilder, child: &str) -> ScriptElement {
         ScriptElement {
             start,
-            child,
+            child: child.to_string(),
             children: Vec::new(),
         }
     }

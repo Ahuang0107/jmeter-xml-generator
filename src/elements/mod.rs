@@ -4,7 +4,9 @@ use crate::elements::config::{
     config_test_element, constant_timer, cookie_manager, header_manager,
 };
 use crate::elements::http::http_sampler_proxy;
-use crate::elements::listeners::result_collector;
+use crate::elements::listeners::{
+    perf_mon_collector, summary_report, view_results_full_visualizer,
+};
 use crate::elements::plan::test_plan;
 use crate::elements::threads::thread_group;
 use crate::script::ScriptElement;
@@ -19,21 +21,21 @@ mod threads;
 
 #[allow(dead_code)]
 pub fn root(
-    host: String,
-    port: String,
-    headers: Vec<(String, String)>,
+    host: &str,
+    port: &str,
+    num_threads: usize,
+    ramp_time: usize,
+    headers: Vec<(&str, &str)>,
     requests: Vec<(Request, String, usize)>,
+    monitor_host_list: Vec<&str>,
 ) -> ScriptElement {
     let mut request_scripts: Vec<ScriptElement> = vec![];
     requests.into_iter().for_each(|(req, url, delay_time)| {
         let with_json = (req.is_post() || req.is_put()) && !req.with_form_data();
-        request_scripts.push(http_sampler_proxy(req, url));
+        request_scripts.push(http_sampler_proxy(req, url.as_str()));
         let mut hash_tree_children: Vec<ScriptElement> = vec![];
         if with_json {
-            hash_tree_children.push(header_manager(vec![(
-                "Content-Type".to_string(),
-                "application/json".to_string(),
-            )]));
+            hash_tree_children.push(header_manager(vec![("Content-Type", "application/json")]));
             hash_tree_children.push(hash_tree(vec![]));
         }
         if delay_time > 0 {
@@ -43,12 +45,12 @@ pub fn root(
         request_scripts.push(hash_tree(hash_tree_children));
     });
     ScriptElement::from(
-        XmlEvent::start_element("jmeterTestPlan".to_string())
-            .attr("version".to_string(), "1.2".to_string())
-            .attr("properties".to_string(), "5.0".to_string())
-            .attr("jmeter".to_string(), "5.5".to_string()),
+        XmlEvent::start_element("jmeterTestPlan")
+            .attr("version", "1.2")
+            .attr("properties", "5.0")
+            .attr("jmeter", "5.5"),
         vec![ScriptElement::from(
-            XmlEvent::start_element("hashTree".to_string()),
+            XmlEvent::start_element("hashTree"),
             vec![
                 config_test_element(host, port),
                 hash_tree(vec![]),
@@ -56,10 +58,17 @@ pub fn root(
                 hash_tree(vec![]),
                 cookie_manager(),
                 hash_tree(vec![]),
-                result_collector(),
+                view_results_full_visualizer(),
+                hash_tree(vec![]),
+                summary_report(),
+                hash_tree(vec![]),
+                perf_mon_collector(monitor_host_list),
                 hash_tree(vec![]),
                 test_plan(),
-                hash_tree(vec![thread_group(), hash_tree(request_scripts)]),
+                hash_tree(vec![
+                    thread_group(num_threads, ramp_time),
+                    hash_tree(request_scripts),
+                ]),
             ],
         )],
     )

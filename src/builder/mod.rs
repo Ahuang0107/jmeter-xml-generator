@@ -9,8 +9,10 @@ pub struct ScriptBuilder {
     host: String,
     port: String,
     num_threads: usize,
+    ramp_time: usize,
     headers: Vec<(String, String)>,
     requests: Vec<(Request, String, usize)>,
+    monitor_host_list: Vec<String>,
 }
 
 #[allow(dead_code)]
@@ -28,13 +30,22 @@ pub enum Request {
 #[wasm_bindgen]
 impl ScriptBuilder {
     /// create a script builder that can generate a jmeter test plan script
-    pub fn new(host: String, port: String, num_threads: usize) -> ScriptBuilder {
+    pub fn new(
+        host: String,
+        port: String,
+        num_threads: usize,
+        ramp_time: usize,
+        monitor_host_list: String,
+    ) -> ScriptBuilder {
         ScriptBuilder {
             host,
             port,
             num_threads,
+            ramp_time,
             headers: Vec::new(),
             requests: Vec::new(),
+            monitor_host_list: serde_json::from_str::<Vec<String>>(monitor_host_list.as_str())
+                .unwrap_throw(),
         }
     }
     pub fn add_header(&mut self, k: String, v: String) {
@@ -82,16 +93,22 @@ impl ScriptBuilder {
         let target: Vec<u8> = Vec::new();
         let mut writer = EventWriter::new(target);
         let script = root(
-            self.host.clone(),
-            self.port.clone(),
+            self.host.as_str(),
+            self.port.as_str(),
+            self.num_threads,
+            self.ramp_time,
             self.headers
                 .iter()
-                .map(|(k, v)| (k.clone(), v.clone()))
-                .collect::<Vec<(String, String)>>(),
+                .map(|(k, v)| (k.as_str(), v.as_str()))
+                .collect::<Vec<(&str, &str)>>(),
             self.requests
                 .iter()
                 .map(|(k, v, t)| (k.clone(), v.clone(), t.clone()))
                 .collect::<Vec<(Request, String, usize)>>(),
+            self.monitor_host_list
+                .iter()
+                .map(|s| &**s)
+                .collect::<Vec<&str>>(),
         );
 
         script.write(&mut writer);
