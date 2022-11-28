@@ -25,7 +25,7 @@ pub fn hello_world() {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
+    use std::fs::{create_dir, File};
     use std::io::Write;
 
     use crate::builder::ScriptBuilder;
@@ -100,7 +100,9 @@ mod tests {
         );
         let target = script_builder.build();
 
-        let mut file = File::create("temp/file.jmx".to_string()).expect("");
+        create_dir("temp").expect("fail to create directory temp");
+
+        let mut file = File::create("temp/file.jmx".to_string()).expect("fail to create file.jmx");
 
         file.write_all(&target).expect("");
     }

@@ -24,9 +24,9 @@ checksum = "4217ad341ebadf8d8e724e264f13e593e0648f5b3e94b3896a5df283be015ecc"
 name = "jmeter-xml-generator"
 version = "0.2.2"
 dependencies = [
-    "serde",
-    "serde_json",
-    "wasm-bindgen",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
 ]
 
 [[package]]
