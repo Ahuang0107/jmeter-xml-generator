@@ -62,7 +62,8 @@ impl Emitter {
         name: String,
         attributes: Vec<(String, String)>,
     ) -> Result<()> {
-        if !self.start_document_emitted {
+        if self.start_document_emitted {
+        } else {
             self.emit_start_document(target)?;
         }
         write!(target, "<{}", name)?;
@@ -84,7 +85,12 @@ impl Emitter {
         Ok(())
     }
     pub fn emit_characters(&mut self, target: &mut Vec<u8>, content: String) -> Result<()> {
-        target.write_all(content.as_bytes())?;
+        target.write_all(
+            content
+                .replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .as_bytes(),
+        )?;
         Ok(())
     }
 }

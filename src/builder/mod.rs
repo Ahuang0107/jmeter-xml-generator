@@ -1,91 +1,197 @@
+use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
 
 use crate::elements::root;
 use crate::xml::EventWriter;
 
-#[allow(dead_code)]
+#[cfg(test)]
+mod test;
+
 #[wasm_bindgen]
 pub struct ScriptBuilder {
-    host: String,
-    port: String,
-    num_threads: usize,
-    ramp_time: usize,
-    headers: Vec<(String, String)>,
-    requests: Vec<(Request, String, usize)>,
-    monitor_host_list: Vec<String>,
+    variables: std::collections::HashMap<String, String>,
+    headers: std::collections::HashMap<String, String>,
+    requests: Vec<RequestArg>,
+    timer: instant::Instant,
+}
+
+#[derive(Clone)]
+pub struct RequestArg {
+    pub protocol: String,
+    pub host: String,
+    pub port: String,
+    pub method: String,
+    pub path: String,
+    pub heads: std::collections::HashMap<String, String>,
+    pub params: std::collections::HashMap<String, String>,
+    pub data: serde_json::Value,
+    pub delay_time: u128,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct AxiosConfigRaw {
+    base_url: Option<String>,
+    url: Option<String>,
+    method: Option<String>,
+    heads: Option<serde_json::Value>,
+    params: Option<serde_json::Value>,
+    data: Option<serde_json::Value>,
 }
 
 #[allow(dead_code)]
-#[derive(Clone)]
-pub enum Request {
-    GET(String),
-    POST {
-        payload: String,
-        with_form_data: bool,
-    },
-    PUT(String),
+pub struct AxiosConfig {
+    base_url: String,
+    url: String,
+    method: String,
+    heads: std::collections::HashMap<String, String>,
+    params: std::collections::HashMap<String, String>,
+    data: serde_json::Value,
+}
+
+#[allow(dead_code)]
+impl AxiosConfigRaw {
+    pub fn from_str(str: &str) -> AxiosConfigRaw {
+        serde_json::from_str::<AxiosConfigRaw>(str).unwrap_or_else(|_| {
+            if cfg!(target_arch = "wasm32") {
+                log::error!("unable to serialize {:?}", str);
+            }
+            panic!("unable to serialize {:?}", str);
+        })
+    }
+    pub fn into_axios_config(self) -> AxiosConfig {
+        let real_heads = match self.heads {
+            Some(v) => serialize_into_string_map_from_value(v),
+            None => std::collections::HashMap::new(),
+        };
+        let real_params = match self.params {
+            Some(v) => serialize_into_string_map_from_value(v),
+            None => std::collections::HashMap::new(),
+        };
+        AxiosConfig {
+            base_url: self.base_url.unwrap_or("".to_string()),
+            url: self.url.unwrap_or("".to_string()),
+            method: self.method.unwrap_or("".to_string()),
+            heads: real_heads,
+            params: real_params,
+            data: self.data.unwrap_or(serde_json::Value::default()),
+        }
+    }
+}
+
+#[allow(dead_code)]
+impl AxiosConfig {
+    pub fn into_request_arg(self, delay_time: u128) -> RequestArg {
+        let actual_url = self.base_url + &*self.url;
+        let url = url::Url::parse(&*actual_url).unwrap_or_else(|_| {
+            if cfg!(target_arch = "wasm32") {
+                log::error!("unable to parse url {:?}", actual_url);
+            }
+            panic!("unable to parse url {:?}", actual_url);
+        });
+        let protocol = if url.scheme() == "http" {
+            "http".to_string()
+        } else if url.scheme() == "https" {
+            "https".to_string()
+        } else {
+            if cfg!(target_arch = "wasm32") {
+                log::error!("unable to find request url protocol {:?}", url);
+            }
+            panic!("unable to find request url protocol {:?}", url);
+        };
+        let host = if let Some(host_str) = url.host_str() {
+            host_str.to_string()
+        } else {
+            if cfg!(target_arch = "wasm32") {
+                log::error!("unable to find request url host {:?}", url);
+            }
+            panic!("unable to find request url host {:?}", url);
+        };
+        let port = if let Some(p) = url.port() {
+            p.to_string()
+        } else {
+            "".to_string()
+        };
+        let path = url.path().replace("//", "/");
+        RequestArg {
+            protocol,
+            host,
+            port,
+            method: self.method.to_uppercase(),
+            path,
+            heads: self.heads,
+            params: self.params,
+            data: self.data,
+            delay_time,
+        }
+    }
+}
+
+#[allow(dead_code)]
+pub fn serialize_into_string_map_from_str(str: &str) -> std::collections::HashMap<String, String> {
+    return match serde_json::from_str::<serde_json::Value>(str) {
+        Ok(value) => serialize_into_string_map_from_value(value),
+        Err(_) => {
+            if cfg!(target_arch = "wasm32") {
+                log::error!("unable to serialize {:?}", str);
+            }
+            panic!("unable to serialize {:?}", str);
+        }
+    };
+}
+
+#[allow(dead_code)]
+pub fn serialize_into_string_map_from_value(
+    value: serde_json::Value,
+) -> std::collections::HashMap<String, String> {
+    let map: std::collections::HashMap<String, String> = if let Some(o) = value.as_object() {
+        o.into_iter()
+            .map(|(k, v)| {
+                let string = if let Some(str) = v.as_str() {
+                    str.to_string()
+                } else {
+                    v.to_string()
+                };
+                return (k.clone(), string);
+            })
+            .collect()
+    } else {
+        std::collections::HashMap::new()
+    };
+    map
 }
 
 #[allow(dead_code)]
 #[wasm_bindgen]
 impl ScriptBuilder {
     /// create a script builder that can generate a jmeter test plan script
-    pub fn new(
-        host: String,
-        port: String,
-        num_threads: usize,
-        ramp_time: usize,
-        monitor_host_list: String,
-    ) -> ScriptBuilder {
+    pub fn new() -> ScriptBuilder {
+        std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+        wasm_logger::init(wasm_logger::Config::default());
         ScriptBuilder {
-            host,
-            port,
-            num_threads,
-            ramp_time,
-            headers: Vec::new(),
+            variables: std::collections::HashMap::new(),
+            headers: std::collections::HashMap::new(),
             requests: Vec::new(),
-            monitor_host_list: serde_json::from_str::<Vec<String>>(monitor_host_list.as_str())
-                .unwrap_throw(),
+            timer: instant::Instant::now(),
         }
     }
     pub fn add_header(&mut self, k: String, v: String) {
-        self.headers.push((k, v));
+        self.headers.insert(k, v);
     }
-    fn add_request(&mut self, req: Request, url: String, delay_time: usize) {
-        self.requests.push((req, url, delay_time));
-    }
-    /// add a get request with a delay time before send this request
-    pub fn get(&mut self, url: String, payload: String, delay_time: usize) {
-        self.add_request(Request::GET(payload), url, delay_time)
-    }
-    /// add a post request with a delay time before send this request
-    /// send request with json data
-    pub fn post(&mut self, url: String, payload: String, delay_time: usize) {
-        self.add_request(
-            Request::POST {
-                payload,
-                with_form_data: false,
-            },
-            url,
-            delay_time,
-        )
-    }
-    /// add a post request with a delay time before send this request
-    /// send request with form data
-    pub fn post_with_form_data(&mut self, url: String, payload: String, delay_time: usize) {
-        self.add_request(
-            Request::POST {
-                payload,
-                with_form_data: true,
-            },
-            url,
-            delay_time,
-        )
-    }
-    /// add a put request with a delay time before send this request
-    /// send request with json data
-    pub fn put(&mut self, url: String, payload: String, delay_time: usize) {
-        self.add_request(Request::PUT(payload), url, delay_time)
+    /// add axios request
+    ///
+    /// * `axios_config_raw` - serialise of AxiosConfigRaw
+    pub fn add_axios_request(&mut self, axios_config_raw: String) {
+        let last_time = self.timer;
+        self.timer = instant::Instant::now();
+        self.requests.push(
+            AxiosConfigRaw::from_str(axios_config_raw.as_str())
+                .into_axios_config()
+                .into_request_arg(self.timer.duration_since(last_time).as_millis()),
+        );
+        if cfg!(target_arch = "wasm32") {
+            log::info!("succeed add request")
+        }
     }
     /// generate the test plan script
     /// return file data
@@ -93,22 +199,18 @@ impl ScriptBuilder {
         let target: Vec<u8> = Vec::new();
         let mut writer = EventWriter::new(target);
         let script = root(
-            self.host.as_str(),
-            self.port.as_str(),
-            self.num_threads,
-            self.ramp_time,
+            self.variables
+                .iter()
+                .map(|(k, v)| (k.as_str(), v.as_str()))
+                .collect::<std::collections::HashMap<&str, &str>>(),
             self.headers
                 .iter()
                 .map(|(k, v)| (k.as_str(), v.as_str()))
                 .collect::<Vec<(&str, &str)>>(),
             self.requests
                 .iter()
-                .map(|(k, v, t)| (k.clone(), v.clone(), t.clone()))
-                .collect::<Vec<(Request, String, usize)>>(),
-            self.monitor_host_list
-                .iter()
-                .map(|s| &**s)
-                .collect::<Vec<&str>>(),
+                .map(|r| r.clone())
+                .collect::<Vec<RequestArg>>(),
         );
 
         script.write(&mut writer);

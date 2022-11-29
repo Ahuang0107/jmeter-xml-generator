@@ -4,32 +4,36 @@ pub struct ScriptElement {
     start: StartElementBuilder,
     child: String,
     children: Vec<ScriptElement>,
+    sub_elements: Option<Vec<ScriptElement>>,
 }
 
 impl ScriptElement {
-    #[allow(dead_code)]
-    pub fn from(start: StartElementBuilder, children: Vec<ScriptElement>) -> ScriptElement {
+    pub fn from_children(
+        start: StartElementBuilder,
+        children: Vec<ScriptElement>,
+    ) -> ScriptElement {
         ScriptElement {
             start,
             child: "".to_string(),
             children,
+            sub_elements: None,
         }
     }
-    #[allow(dead_code)]
     pub fn from_str(start: StartElementBuilder, child: &str) -> ScriptElement {
         ScriptElement {
             start,
             child: child.to_string(),
             children: Vec::new(),
+            sub_elements: None,
         }
     }
-    #[allow(dead_code)]
-    pub fn from_empty(start: StartElementBuilder) -> ScriptElement {
-        ScriptElement {
-            start,
-            child: "".to_string(),
-            children: Vec::new(),
+    pub fn add_subs(mut self, subs: Vec<ScriptElement>) -> ScriptElement {
+        if let Some(ref mut els) = self.sub_elements {
+            els.extend(subs);
+        } else {
+            self.sub_elements = Some(subs)
         }
+        self
     }
     #[allow(dead_code)]
     pub fn write(self, writer: &mut EventWriter) {
@@ -40,5 +44,17 @@ impl ScriptElement {
         writer
             .write(XmlEvent::end_element(Some(name)).into())
             .expect("");
+        match self.sub_elements {
+            None => {}
+            Some(els) => {
+                writer
+                    .write(XmlEvent::start_element("hashTree").into())
+                    .expect("");
+                els.into_iter().for_each(|c| c.write(writer));
+                writer
+                    .write(XmlEvent::end_element(Some("hashTree".to_string())).into())
+                    .expect("");
+            }
+        }
     }
 }
