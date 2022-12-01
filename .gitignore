@@ -2,3 +2,6 @@
 /.idea
 /pkg
 /temp
+
+/preview/**/node_modules
+/preview/**/package-lock.json
