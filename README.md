@@ -11,58 +11,73 @@
 
 ## Example
 
-Hello world.
+### Vue + Axios
 
-```ts
-import {hello_world} from "jmeter-xml-generator";
+You can see example in [example-with-vue2](/preview/example-with-vue2)
 
-hello_world();
-```
+Generate jmeter performance test script with Vue and Axios.
 
-Generate jmeter performance test script.
+1. install
 
-```ts
-import {Request, ScriptBuilder} from "jmeter-xml-generator";
+   ```shell
+   npm install jmeter-xml-generator@0.3.0
+   ```
 
-// 500 is threads number
-const scriptBuilder = ScriptBuilder.new("custom host", "custom post", 500);
-scriptBuilder.add_header("header key", "header value");
-// GET request (delay 300 milliseconds)
-scriptBuilder.get(
-    "request url",
-    JSON.stringify([
-        {key: "query string parameter key", value: "query string parameter value"},
-    ]),
-    300
-);
-// POST request with multipart data
-scriptBuilder.post_with_form_data(
-    "request url",
-    JSON.stringify([
-        {key: "query string parameter key", value: "query string parameter value"},
-    ]),
-    300
-);
-// POST request with json body
-scriptBuilder.post(
-    "request url",
-    JSON.stringify({
-        current: 1,
-        size: 15,
-        status: 0,
-    }),
-    300
-);
-// PUT request with json body
-scriptBuilder.put(
-    "request url",
-    JSON.stringify({
-        current: 1,
-        size: 15,
-        status: 0,
-    }),
-    300
-);
+2. enable WebAssembly in Vue2
 
-const result = scriptBuilder.build();
-```
+   ```js
+   // vue.config.js
+   const {defineConfig} = require('@vue/cli-service')
+   module.exports = defineConfig({
+      transpileDependencies: true,
+      configureWebpack: {
+         experiments: {
+            asyncWebAssembly: true,
+         }
+      }
+   })
+   ```
+
+3. bind scriptBuilder to Vue.prototype
+
+    ```js
+    import {ScriptBuilder} from "jmeter-xml-generator"
+    
+    Vue.prototype.scriptBuilder = ScriptBuilder.new()
+    ```
+
+4. add middleware to axios
+
+    ```js
+    const instance = axios.create({
+        baseURL: 'http://localhost:26005/'
+    })
+    instance.interceptors.request.use(function (config) {
+        const heads = {"Content-Type": config.headers["Content-Type"]}
+        const requestArg = JSON.stringify({
+            baseUrl: config.baseURL,
+            url: config.url,
+            method: config.method,
+            heads,
+            params: config.params,
+            data: config.data,
+        })
+        Vue.prototype.scriptBuilder.add_axios_request(requestArg)
+        return config
+    })
+    ```
+5. download script
+
+    ```js
+    const result = Vue.prototype.scriptBuilder.build()
+    let blob = new Blob([result], {type: "application/xml"})
+    let blobUrl = URL.createObjectURL(blob)
+    let linkDOM = document.createElement("a")
+    linkDOM.style.display = "none"
+    linkDOM.href = blobUrl
+    linkDOM.setAttribute("download", "test script " + Date.now() + ".jmx")
+    document.body.appendChild(linkDOM)
+    linkDOM.click()
+    document.body.removeChild(linkDOM)
+    URL.revokeObjectURL(blobUrl)
+    ```
