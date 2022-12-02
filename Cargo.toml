@@ -1,7 +1,9 @@
 [package]
 name = "jmeter-xml-generator"
-version = "0.2.2"
+version = "0.3.0"
 edition = "2021"
+repository = "https://github.com/Ahuang0107/jmeter-xml-generator"
+homepage = "https://github.com/Ahuang0107/jmeter-xml-generator"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
