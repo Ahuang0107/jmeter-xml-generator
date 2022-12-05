@@ -1,4 +1,4 @@
-use crate::builder::serialize_into_string_map_from_str;
+use crate::builder::{serialize_into_string_map_from_str, AxiosConfig};
 
 #[test]
 fn test_serialize_into_string_map_from_str() {
@@ -27,5 +27,23 @@ fn test_serialize_into_string_map_from_str() {
     assert_eq!(
         result.get("Content-Type"),
         Some(&"multipart/form-data".to_string())
+    );
+}
+
+#[test]
+fn test_into_request_arg() {
+    let config = AxiosConfig {
+        base_url: "http://localhost/endpoint/".to_string(),
+        url: "/eic_booking/listByEngagementCodeIds?startDate=1643677207051&endDate=1706662807051&engagementCodeIds=22920".to_string(),
+        method: "GET".to_string(),
+        heads: std::collections::HashMap::new(),
+        params: std::collections::HashMap::new(),
+        data: serde_json::Value::Null,
+    };
+    let arg = config.into_request_arg(0);
+    assert_eq!(arg.params.len(), 3);
+    assert_eq!(
+        arg.params.get("startDate"),
+        Some(&"1643677207051".to_string())
     );
 }

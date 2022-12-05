@@ -81,8 +81,18 @@ impl AxiosConfigRaw {
 
 #[allow(dead_code)]
 impl AxiosConfig {
-    pub fn into_request_arg(self, delay_time: u128) -> RequestArg {
+    pub fn into_request_arg(mut self, delay_time: u128) -> RequestArg {
         let actual_url = self.base_url + &*self.url;
+        let split = actual_url.split('?').collect::<Vec<&str>>();
+        let actual_url = split.first().unwrap_or(&"");
+        let path_params_string = split.last().unwrap_or(&"");
+        let path_params = path_params_string.split('&').collect::<Vec<&str>>();
+        path_params.iter().for_each(|s| {
+            let kv = s.split('=').collect::<Vec<&str>>();
+            let k = kv.first().unwrap_or(&"");
+            let v = kv.last().unwrap_or(&"");
+            self.params.insert(k.to_string(), v.to_string());
+        });
         let url = url::Url::parse(&*actual_url).unwrap_or_else(|_| {
             if cfg!(target_arch = "wasm32") {
                 log::error!("unable to parse url {:?}", actual_url);
