@@ -5,6 +5,13 @@ edition = "2021"
 repository = "https://github.com/Ahuang0107/jmeter-xml-generator"
 homepage = "https://github.com/Ahuang0107/jmeter-xml-generator"
 
+[package.metadata.scripts]
+build = "wasm-pack build"
+pack = "wasm-pack pack"
+publish = "wasm-pack publish"
+mdbook-serve = "mdbook serve doc -p 12025 -n 127.0.0.1 --open"
+preview-vue2-example = "cd ./preview/example-with-vue2 && npm run serve"
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 

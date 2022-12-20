@@ -1,0 +1,1 @@
+D:\project\business-project\share\performance-test\apache-jmeter-5.5\bin\jmeter -n -t smart-hub-2.jmx -l report/result.jtl -e -o report/web/

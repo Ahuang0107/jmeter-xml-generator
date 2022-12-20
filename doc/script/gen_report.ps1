@@ -1,0 +1,1 @@
+D:\project\business-project\share\performance-test\apache-jmeter-5.5\bin\jmeter -g report/result.jtl -o report/web/
