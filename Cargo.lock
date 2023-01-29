@@ -67,6 +67,7 @@ version = "0.3.1"
 dependencies = [
  "console_error_panic_hook",
  "instant",
+ "js-sys",
  "log",
  "serde",
  "serde_json",

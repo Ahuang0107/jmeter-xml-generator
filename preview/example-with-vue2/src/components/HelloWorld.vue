@@ -22,18 +22,44 @@
     <ul>
       <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
       <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
+      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a>
+      </li>
       <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
       <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
+    </ul>
+    <h3>Request Explore</h3>
+    <ul>
+      <li>
+        <button @click="get">GET</button>
+        <button @click="post">POST</button>
+        <button @click="postForm">POST</button>
+        <button @click="put">PUT</button>
+      </li>
     </ul>
   </div>
 </template>
 
 <script>
+import Vue from "vue";
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String
+  },
+  methods: {
+    get() {
+      Vue.prototype.instance.get('/get', {params: {name: "elase"}}).then(res => console.log(res.data))
+    },
+    post() {
+      Vue.prototype.instance.post('/post', {name: "elase"}).then(res => console.log(res.data))
+    },
+    postForm() {
+      Vue.prototype.instance.postForm('/post-with-form', {name: "elase", age: 24}).then(res => console.log(res.data))
+    },
+    put() {
+      Vue.prototype.instance.put('/put', {name: "elase"}).then(res => console.log(res.data))
+    }
   }
 }
 </script>

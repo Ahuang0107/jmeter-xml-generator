@@ -12,7 +12,7 @@ mod tests {
 
     #[test]
     fn test() {
-        let mut script_builder = ScriptBuilder::new();
+        let mut script_builder = ScriptBuilder::mock();
         script_builder.add_header("appCode".to_string(), "resource".to_string());
         script_builder.add_header(
             "test".to_string(),
