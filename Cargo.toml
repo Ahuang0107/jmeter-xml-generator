@@ -5,6 +5,12 @@ edition = "2021"
 repository = "https://github.com/Ahuang0107/jmeter-xml-generator"
 homepage = "https://github.com/Ahuang0107/jmeter-xml-generator"
 
+[package.metadata.scripts]
+build = "wasm-pack build"
+pack = "wasm-pack pack"
+publish = "wasm-pack publish"
+preview-vue2-example = "cd ./preview/example-with-vue2 && npm run serve"
+
 [lib]
 crate-type = ["cdylib", "rlib"]
 
@@ -19,3 +25,16 @@ console_error_panic_hook = "0.1.7"
 instant = { version = "0.1", features = ["wasm-bindgen", "inaccurate"] }
 log = "0.4.6"
 wasm-logger = "0.2.0"
+
+[dependencies.web-sys]
+version = "0.3.4"
+features = [
+    'Document',
+    'Element',
+    'EventTarget',
+    'HtmlElement',
+    'MouseEvent',
+    'KeyboardEvent',
+    'Node',
+    'Window',
+]

@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 
 use crate::elements::root;
 use crate::xml::EventWriter;
@@ -13,6 +14,7 @@ pub struct ScriptBuilder {
     headers: std::collections::HashMap<String, String>,
     requests: Vec<RequestArg>,
     timer: instant::Instant,
+    switch: std::rc::Rc<std::cell::RefCell<bool>>,
 }
 
 #[derive(Clone)]
@@ -178,20 +180,51 @@ impl ScriptBuilder {
     pub fn new() -> ScriptBuilder {
         std::panic::set_hook(Box::new(console_error_panic_hook::hook));
         wasm_logger::init(wasm_logger::Config::default());
+        let document = web_sys::window().unwrap().document().unwrap();
+        let switch = std::rc::Rc::new(std::cell::RefCell::new(false));
+        {
+            let switch = switch.clone();
+            let closure = Closure::<dyn FnMut(_)>::new(move |e: web_sys::KeyboardEvent| {
+                if e.shift_key() && e.key() == "J" {
+                    if !switch.take() {
+                        if cfg!(target_arch = "wasm32") {
+                            log::info!("open switch");
+                        }
+                        switch.replace(true);
+                    } else {
+                        if cfg!(target_arch = "wasm32") {
+                            log::info!("close switch");
+                        }
+                        switch.replace(false);
+                    }
+                }
+            });
+            document
+                .add_event_listener_with_callback("keypress", closure.as_ref().unchecked_ref())
+                .expect("unable to add keypress event listener");
+            closure.forget();
+        }
         ScriptBuilder {
             variables: std::collections::HashMap::new(),
             headers: std::collections::HashMap::new(),
             requests: Vec::new(),
             timer: instant::Instant::now(),
+            switch,
         }
     }
     pub fn add_header(&mut self, k: String, v: String) {
+        if !self.switch.take() {
+            return;
+        }
         self.headers.insert(k, v);
     }
     /// add axios request
     ///
     /// * `axios_config_raw` - serialise of AxiosConfigRaw
     pub fn add_axios_request(&mut self, axios_config_raw: String) {
+        if !self.switch.take() {
+            return;
+        }
         let last_time = self.timer;
         self.timer = instant::Instant::now();
         self.requests.push(
