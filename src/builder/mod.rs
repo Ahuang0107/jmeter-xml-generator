@@ -321,11 +321,6 @@ impl ScriptBuilder {
     pub fn build(&self) -> Vec<u8> {
         self.target.borrow_mut().build()
     }
-    #[cfg(test)]
-    pub fn mock() -> Self {
-        let target = std::rc::Rc::new(std::cell::RefCell::new(ScriptGenerator::mock()));
-        Self { target }
-    }
 }
 
 impl ScriptGenerator {
@@ -396,17 +391,5 @@ impl ScriptGenerator {
 
         script.write(&mut writer);
         writer.export()
-    }
-    #[cfg(test)]
-    pub fn mock() -> ScriptGenerator {
-        std::panic::set_hook(Box::new(console_error_panic_hook::hook));
-        wasm_logger::init(wasm_logger::Config::default());
-        ScriptGenerator {
-            variables: std::collections::HashMap::new(),
-            headers: std::collections::HashMap::new(),
-            requests: Vec::new(),
-            timer: instant::Instant::now(),
-            switch: true,
-        }
     }
 }

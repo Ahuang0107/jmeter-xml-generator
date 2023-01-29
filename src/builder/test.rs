@@ -47,3 +47,34 @@ fn test_into_request_arg() {
         Some(&"1643677207051".to_string())
     );
 }
+
+#[test]
+fn test() {
+    let mut script_builder = crate::builder::ScriptGenerator::new();
+    script_builder.switch = true;
+    script_builder.add_header("appCode".to_string(), "resource".to_string());
+    script_builder.add_header(
+        "test".to_string(),
+        "7EBZfzzrPWHBmXJtl#86LDs6varwXlYF".to_string(),
+    );
+    script_builder.add_axios_request(
+        r#"
+        {
+            "baseUrl": "http://192.168.207.17/server/endpoint/",
+            "url": "/admin_user/login",
+            "method": "post",
+            "heads": {"Content-Type":"multipart/form-data","appCode":"resource"},
+            "params": "{}",
+            "data": {"username":"smarthubdev","password":"smarthub@1234"}
+        }"#
+        .to_string(),
+    );
+    let target = script_builder.build();
+
+    std::fs::create_dir_all("temp").expect("fail to create directory temp");
+
+    let mut file =
+        std::fs::File::create("temp/file.jmx".to_string()).expect("fail to create file.jmx");
+
+    std::io::Write::write_all(&mut file, &target).expect("");
+}
