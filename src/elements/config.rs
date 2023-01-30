@@ -94,4 +94,5 @@ pub(crate) fn constant_timer(delay: u128) -> ScriptElement {
             delay.to_string().as_str(),
         )],
     )
+    .add_subs(vec![])
 }

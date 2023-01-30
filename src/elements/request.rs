@@ -1,4 +1,5 @@
 use crate::builder::{serialize_into_string_map_from_value, RequestArg};
+use crate::elements::assertions::json_path_assertion;
 use crate::elements::base::{bool_prop, element_prop, element_props, string_prop};
 use crate::elements::config::{constant_timer, header_manager};
 use crate::script::ScriptElement;
@@ -102,9 +103,13 @@ pub fn http_sampler_proxy(request: &RequestArg) -> ScriptElement {
         result.add_subs(vec![
             header_manager(vec![("Content-Type", "application/json")]),
             constant_timer(delay),
+            // json_path_assertion("$.code", "200"),
         ])
     } else {
-        result.add_subs(vec![constant_timer(delay)])
+        result.add_subs(vec![
+            constant_timer(delay),
+            // json_path_assertion("$.code", "200"),
+        ])
     }
 }
 

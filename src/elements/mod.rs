@@ -6,6 +6,7 @@ use crate::elements::request::http_sampler_proxy;
 use crate::elements::threads::thread_group;
 use crate::script::ScriptElement;
 
+mod assertions;
 mod base;
 mod config;
 mod listeners;
