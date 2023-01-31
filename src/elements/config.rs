@@ -1,8 +1,8 @@
-use crate::elements::base::{bool_prop, collection_prop, element_prop, string_prop};
+use crate::elements::base::{bool_prop, collection_prop, element_prop, element_props, string_prop};
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
-pub fn arguments(variables: std::collections::HashMap<&str, &str>) -> ScriptElement {
+pub fn arguments(variables: &Vec<(String, String)>) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("Arguments")
             .attr("guiclass", "ArgumentsPanel")
@@ -30,8 +30,7 @@ pub fn arguments(variables: std::collections::HashMap<&str, &str>) -> ScriptElem
     .add_subs(vec![])
 }
 
-#[allow(dead_code)]
-pub(crate) fn header_manager(headers: Vec<(&str, &str)>) -> ScriptElement {
+pub(crate) fn header_manager(headers: &Vec<(String, String)>) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("HeaderManager")
             .attr("guiclass", "HeaderPanel")
@@ -42,14 +41,13 @@ pub(crate) fn header_manager(headers: Vec<(&str, &str)>) -> ScriptElement {
             "HeaderManager.headers",
             headers
                 .into_iter()
-                .map(|a| header(a.0, a.1))
+                .map(|(k, v)| header(k, v))
                 .collect::<Vec<ScriptElement>>(),
         )],
     )
     .add_subs(vec![])
 }
 
-#[allow(dead_code)]
 pub(crate) fn cookie_manager() -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("CookieManager")
@@ -69,7 +67,6 @@ pub(crate) fn cookie_manager() -> ScriptElement {
     .add_subs(vec![])
 }
 
-#[allow(dead_code)]
 pub(crate) fn header(name: &str, value: &str) -> ScriptElement {
     element_prop(
         "",
@@ -81,7 +78,6 @@ pub(crate) fn header(name: &str, value: &str) -> ScriptElement {
     )
 }
 
-#[allow(dead_code)]
 pub(crate) fn constant_timer(delay: u128) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("ConstantTimer")
@@ -93,6 +89,28 @@ pub(crate) fn constant_timer(delay: u128) -> ScriptElement {
             "ConstantTimer.delay",
             delay.to_string().as_str(),
         )],
+    )
+    .add_subs(vec![])
+}
+
+pub(crate) fn request_default(protocol: &str, host: &str, port: &str) -> ScriptElement {
+    ScriptElement::from_children(
+        XmlEvent::start_element("ConfigTestElement")
+            .attr("guiclass", "HttpDefaultsGui")
+            .attr("testclass", "ConfigTestElement")
+            .attr("testname", "HTTP Request Defaults")
+            .attr("enabled", "true"),
+        vec![
+            element_props("HTTPsampler.Arguments", vec![]),
+            string_prop("HTTPSampler.domain", host),
+            string_prop("HTTPSampler.port", port),
+            string_prop("HTTPSampler.protocol", protocol),
+            string_prop("HTTPSampler.contentEncoding", ""),
+            string_prop("HTTPSampler.path", ""),
+            string_prop("HTTPSampler.concurrentPool", ""),
+            string_prop("HTTPSampler.connect_timeout", ""),
+            string_prop("HTTPSampler.response_timeout", ""),
+        ],
     )
     .add_subs(vec![])
 }
