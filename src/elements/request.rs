@@ -1,6 +1,9 @@
 use crate::elements::assertions::json_path_assertion;
 use crate::elements::base::{bool_prop, element_prop, element_props, string_prop};
 use crate::elements::config::header_manager;
+use crate::elements::post_processors::{groovy_post_processor, json_post_processor};
+use crate::elements::pre_processors::groovy_pre_processor;
+use crate::elements::timer::constant_timer;
 use crate::request::RequestArg;
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
@@ -16,7 +19,7 @@ pub fn http_sampler_proxy(request: &RequestArg) -> ScriptElement {
         bool_prop("HTTPSampler.follow_redirects", true),
         bool_prop("HTTPSampler.auto_redirects", false),
         bool_prop("HTTPSampler.use_keepalive", true),
-        bool_prop("HTTPSampler.DO_MULTIPART_POST", request.if_form_data_body()),
+        bool_prop("HTTPSampler.DO_MULTIPART_POST", false),
         string_prop("HTTPSampler.embedded_url_re", ""),
         string_prop("HTTPSampler.connect_timeout", ""),
         string_prop("HTTPSampler.response_timeout", ""),
@@ -67,25 +70,48 @@ pub fn http_sampler_proxy(request: &RequestArg) -> ScriptElement {
     }
     .into_iter()
     .for_each(|g| children.push(g));
-    let result = ScriptElement::from_children(
+    let name = if let Some(name) = request.name.clone() {
+        name
+    } else {
+        request.path().to_string()
+    };
+    let mut result = ScriptElement::from_children(
         XmlEvent::start_element("HTTPSamplerProxy")
             .attr("guiclass", "HttpTestSampleGui")
             .attr("testclass", "HTTPSamplerProxy")
-            .attr("testname", request.path())
+            .attr("testname", &name)
             .attr("enabled", "true"),
         children,
     );
     if request.if_json_body() {
-        result.add_subs(vec![
-            header_manager(&vec![(
-                String::from("Content-Type"),
-                String::from("application/json"),
-            )]),
-            json_path_assertion("$.code", "0"),
-        ])
-    } else {
-        result.add_subs(vec![json_path_assertion("$.code", "0")])
+        result.add_subs(vec![header_manager(&vec![(
+            String::from("Content-Type"),
+            String::from("application/json"),
+        )])])
     }
+    if !request.json_post_processors.is_empty() {
+        request
+            .json_post_processors
+            .iter()
+            .for_each(|(k, v)| result.add_subs(vec![json_post_processor(k, v)]));
+    }
+    if !request.groovy_post_processors.is_empty() {
+        request
+            .groovy_post_processors
+            .iter()
+            .for_each(|v| result.add_subs(vec![groovy_post_processor(v)]));
+    }
+    if !request.groovy_pre_processors.is_empty() {
+        request
+            .groovy_pre_processors
+            .iter()
+            .for_each(|v| result.add_subs(vec![groovy_pre_processor(v)]));
+    }
+    result.add_subs(vec![json_path_assertion("$.code", "0")]);
+    if request.delay() > 0 {
+        result.add_subs(vec![constant_timer(request.delay())]);
+    }
+    result
 }
 
 fn argument(name: &str, value: &str) -> ScriptElement {

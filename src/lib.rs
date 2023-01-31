@@ -2,9 +2,10 @@
 #![allow(unused_variables)]
 
 mod axios_config;
-mod builder;
 mod elements;
-mod generator;
-mod request;
+pub mod generator;
+#[cfg(target_arch = "wasm32")]
+mod kit;
+pub mod request;
 mod script;
 mod xml;

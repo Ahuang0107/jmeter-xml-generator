@@ -13,6 +13,11 @@ pub struct RequestArg {
     path: String,
     headers: Vec<(String, String)>,
     param: serde_json::Value,
+    // Display Name
+    pub(crate) name: Option<String>,
+    pub(crate) json_post_processors: Vec<(String, String)>,
+    pub(crate) groovy_pre_processors: Vec<String>,
+    pub(crate) groovy_post_processors: Vec<String>,
     delay: u128,
 }
 
@@ -26,6 +31,10 @@ impl RequestArg {
             path: String::new(),
             headers: vec![],
             param: serde_json::Value::Null,
+            name: None,
+            json_post_processors: vec![],
+            groovy_pre_processors: vec![],
+            groovy_post_processors: vec![],
             delay: 0,
         }
     }
@@ -54,8 +63,31 @@ impl RequestArg {
     pub fn set_param(&mut self, param: serde_json::Value) {
         self.param = param;
     }
+    pub fn add_json_processor(&mut self, value: (&str, &str)) {
+        self.json_post_processors
+            .push((value.0.to_string(), value.1.to_string()))
+    }
+    pub fn with_json_processor(mut self, value: (&str, &str)) -> Self {
+        self.add_json_processor(value);
+        self
+    }
+    fn add_groovy_processor(&mut self, value: &str, post: bool) {
+        if post {
+            self.groovy_post_processors.push(value.to_string());
+        } else {
+            self.groovy_pre_processors.push(value.to_string());
+        }
+    }
+    pub fn with_groovy_processor(mut self, value: &str, post: bool) -> Self {
+        self.add_groovy_processor(value, post);
+        self
+    }
     pub fn set_delay(&mut self, delay: u128) {
         self.delay = delay;
+    }
+    pub fn with_delay(mut self, delay: u128) -> Self {
+        self.delay = delay;
+        self
     }
     pub fn method(&self) -> &str {
         self.method.as_str()
@@ -78,21 +110,22 @@ impl RequestArg {
     pub fn delay(&self) -> u128 {
         self.delay
     }
-    pub fn if_form_data_body(&self) -> bool {
+    pub fn if_form_body(&self) -> bool {
         self.method == "POST"
             && self.headers.contains(&(
                 String::from("Content-Type"),
-                String::from("multipart/form-data"),
+                String::from("application/x-www-form-urlencoded"),
             ))
     }
     pub fn if_json_body(&self) -> bool {
-        (self.method == "POST" || self.method == "PUT") && !self.if_form_data_body()
+        (self.method == "POST" || self.method == "PUT") && !self.if_form_body()
     }
+    #[cfg(test)]
     pub fn body(&self) -> serde_json::Value {
         self.param.clone()
     }
     pub fn body_string(&self) -> String {
-        serde_json::to_string(&self.param).unwrap()
+        remove_json_string_variable_quota(serde_json::to_string(&self.param).unwrap())
     }
     pub fn params(&self) -> Vec<(String, String)> {
         let mut result = vec![];
@@ -110,6 +143,47 @@ impl RequestArg {
             })
         }
         result
+    }
+    pub fn from_get(url: &str, param: Option<serde_json::Value>) -> Self {
+        let mut arg = RequestArg::new();
+        arg.set_method("GET");
+        arg.set_path(url);
+        if let Some(param) = param {
+            arg.set_param(param);
+        }
+        arg
+    }
+    pub fn from_post(url: &str, param: Option<serde_json::Value>) -> Self {
+        let mut arg = RequestArg::new();
+        arg.set_method("POST");
+        arg.set_path(url);
+        if let Some(param) = param {
+            arg.set_param(param);
+        }
+        arg
+    }
+    pub fn from_post_form(url: &str, param: Option<serde_json::Value>) -> Self {
+        let mut arg = RequestArg::new();
+        arg.set_method("POST");
+        arg.set_path(url);
+        arg.set_header(("Content-Type", "application/x-www-form-urlencoded"));
+        if let Some(param) = param {
+            arg.set_param(param);
+        }
+        arg
+    }
+    pub fn from_put(url: &str, param: Option<serde_json::Value>) -> Self {
+        let mut arg = RequestArg::new();
+        arg.set_method("PUT");
+        arg.set_path(url);
+        if let Some(param) = param {
+            arg.set_param(param);
+        }
+        arg
+    }
+    pub fn with_name(mut self, name: &str) -> Self {
+        self.name = Some(name.to_string());
+        self
     }
 }
 
@@ -141,3 +215,32 @@ impl From<AxiosRequestConfig> for RequestArg {
 
 #[cfg(test)]
 mod test;
+
+pub fn remove_json_string_variable_quota(value: String) -> String {
+    let mut inter = value.chars().collect::<Vec<char>>();
+    inter.extend(vec!['E', 'D']);
+    let mut windows = inter.windows(3);
+
+    let mut variable_start = false;
+    let mut result: Vec<char> = vec![];
+    let mut last_is_variable_end = false;
+    while let Some(sub) = windows.next() {
+        let mut need = !last_is_variable_end;
+        if sub == ['"', '$', '{'] {
+            variable_start = true;
+            need = false;
+        }
+
+        if variable_start && sub[0] == '}' {
+            variable_start = false;
+            last_is_variable_end = true;
+        } else {
+            last_is_variable_end = false;
+        }
+
+        if need {
+            result.push(sub[0])
+        }
+    }
+    String::from_iter(result)
+}

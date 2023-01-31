@@ -2,8 +2,26 @@ use crate::elements::base::{bool_prop, string_prop};
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
-#[allow(dead_code)]
-pub(crate) fn thread_group(children: Vec<ScriptElement>) -> ScriptElement {
+pub(crate) fn thread_group(
+    num_threads: usize,
+    ramp_time: usize,
+    loops: Option<usize>,
+    lifetime: Option<usize>,
+    stop_when_error: bool,
+    children: Vec<ScriptElement>,
+) -> ScriptElement {
+    let continue_forever = loops.is_none();
+    let loops = if let Some(loops) = loops {
+        loops.to_string()
+    } else {
+        String::from("-1")
+    };
+    let scheduler = lifetime.is_some();
+    let lifetime = if let Some(lifetime) = lifetime {
+        lifetime.to_string()
+    } else {
+        String::new()
+    };
     ScriptElement::from_children(
         XmlEvent::start_element("ThreadGroup")
             .attr("guiclass", "ThreadGroupGui")
@@ -11,7 +29,15 @@ pub(crate) fn thread_group(children: Vec<ScriptElement>) -> ScriptElement {
             .attr("testname", "Thread Group")
             .attr("enabled", "true"),
         vec![
-            string_prop("ThreadGroup.on_sample_error", "continue"),
+            // continue stopthread
+            string_prop(
+                "ThreadGroup.on_sample_error",
+                if stop_when_error {
+                    "stopthread"
+                } else {
+                    "continue"
+                },
+            ),
             ScriptElement::from_children(
                 XmlEvent::start_element("elementProp")
                     .attr("name", "ThreadGroup.main_controller")
@@ -21,17 +47,17 @@ pub(crate) fn thread_group(children: Vec<ScriptElement>) -> ScriptElement {
                     .attr("testname", "Loop Controller")
                     .attr("enabled", "true"),
                 vec![
-                    bool_prop("LoopController.continue_forever", false),
-                    string_prop("LoopController.loops", "1"),
+                    bool_prop("LoopController.continue_forever", continue_forever),
+                    string_prop("LoopController.loops", &loops),
                 ],
             ),
-            string_prop("ThreadGroup.num_threads", "1"),
-            string_prop("ThreadGroup.ramp_time", "1"),
-            bool_prop("ThreadGroup.scheduler", false),
+            string_prop("ThreadGroup.num_threads", &num_threads.to_string()),
+            string_prop("ThreadGroup.ramp_time", &ramp_time.to_string()),
+            bool_prop("ThreadGroup.scheduler", scheduler),
             string_prop("ThreadGroup.delay", ""),
             bool_prop("ThreadGroup.same_user_on_next_iteration", true),
-            string_prop("TestPlan.comments", ""),
+            string_prop("ThreadGroup.duration", &lifetime),
         ],
     )
-    .add_subs(children)
+    .with_subs(children)
 }

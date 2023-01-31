@@ -10,5 +10,5 @@ pub(crate) fn once_only_controller(children: Vec<ScriptElement>) -> ScriptElemen
             .attr("enabled", "true"),
         vec![],
     )
-    .add_subs(children)
+    .with_subs(children)
 }

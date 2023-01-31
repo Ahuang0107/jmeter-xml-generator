@@ -2,7 +2,6 @@ use crate::elements::base::{bool_prop, string_prop};
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
-#[allow(dead_code)]
 pub fn json_path_assertion(json_path: &str, expected_value: &str) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("JSONPathAssertion")
@@ -19,5 +18,5 @@ pub fn json_path_assertion(json_path: &str, expected_value: &str) -> ScriptEleme
             bool_prop("ISREGEX", true),
         ],
     )
-    .add_subs(vec![])
+    .with_subs(vec![])
 }

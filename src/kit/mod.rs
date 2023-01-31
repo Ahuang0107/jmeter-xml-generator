@@ -14,7 +14,7 @@ pub struct ScriptGeneratorKit {
 #[wasm_bindgen]
 #[cfg(target_arch = "wasm32")]
 impl ScriptGeneratorKit {
-    /// create a script builder that can generate a jmeter test plan script
+    /// create a script kit that can generate a jmeter test plan script
     pub fn new() -> Self {
         let target = std::rc::Rc::new(std::cell::RefCell::new(ScriptGenerator::new()));
         let switch = std::rc::Rc::new(std::cell::RefCell::new(false));
@@ -149,6 +149,3 @@ impl ScriptGeneratorKit {
         self.target.borrow_mut().build()
     }
 }
-
-#[cfg(test)]
-mod test;

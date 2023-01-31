@@ -50,5 +50,5 @@ pub(crate) fn view_results_full_visualizer() -> ScriptElement {
             string_prop("filename", ""),
         ],
     )
-    .add_subs(vec![])
+    .with_subs(vec![])
 }

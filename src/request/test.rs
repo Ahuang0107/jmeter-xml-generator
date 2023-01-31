@@ -1,7 +1,7 @@
 use serde_json::json;
 
 use crate::axios_config::AxiosRequestConfig;
-use crate::request::RequestArg;
+use crate::request::{remove_json_string_variable_quota, RequestArg};
 
 #[test]
 fn check_request_arg() {
@@ -46,17 +46,17 @@ fn check_request_arg() {
     mock_body.insert(String::from("admin"), json!(true));
     mock_body.insert(String::from("deleted"), json!(-1));
     assert_eq!(arg.body(), serde_json::Value::Object(mock_body));
-    assert!(!arg.if_form_data_body());
+    assert!(!arg.if_form_body());
     assert!(!arg.if_json_body());
     arg.set_method("POST");
-    assert!(!arg.if_form_data_body());
+    assert!(!arg.if_form_body());
     assert!(arg.if_json_body());
     arg.clear_headers();
-    arg.set_header(("Content-Type", "multipart/form-data"));
-    assert!(arg.if_form_data_body());
+    arg.set_header(("Content-Type", "application/x-www-form-urlencoded"));
+    assert!(arg.if_form_body());
     assert!(!arg.if_json_body());
     arg.set_method("PUT");
-    assert!(!arg.if_form_data_body());
+    assert!(!arg.if_form_body());
     assert!(arg.if_json_body());
     assert_eq!(
         arg.params(),
@@ -74,7 +74,6 @@ fn check_request_arg() {
 fn check_from() {
     let config = serde_json::from_str::<AxiosRequestConfig>(GET).unwrap();
     let arg = RequestArg::from(config);
-    println!("{:?}", arg);
 }
 
 const GET: &str = r#"
@@ -90,3 +89,15 @@ const GET: &str = r#"
   "url": "/get"
 }
 "#;
+
+#[test]
+fn check_remove_quota() {
+    let string = String::from(
+        "{\"id\":\"${budgetId}\",\"name\":\"${budgetName}\",\"list\":${list},\"extension\":\"{}\"}",
+    );
+    let result = remove_json_string_variable_quota(string);
+    assert_eq!(
+        result,
+        "{\"id\":${budgetId},\"name\":${budgetName},\"list\":${list},\"extension\":\"{}\"}"
+    );
+}

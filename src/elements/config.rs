@@ -1,4 +1,5 @@
 use crate::elements::base::{bool_prop, collection_prop, element_prop, element_props, string_prop};
+use crate::generator::CsvDataSetConfig;
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
@@ -27,7 +28,7 @@ pub fn arguments(variables: &Vec<(String, String)>) -> ScriptElement {
                 .collect(),
         )],
     )
-    .add_subs(vec![])
+    .with_subs(vec![])
 }
 
 pub(crate) fn header_manager(headers: &Vec<(String, String)>) -> ScriptElement {
@@ -45,7 +46,7 @@ pub(crate) fn header_manager(headers: &Vec<(String, String)>) -> ScriptElement {
                 .collect::<Vec<ScriptElement>>(),
         )],
     )
-    .add_subs(vec![])
+    .with_subs(vec![])
 }
 
 pub(crate) fn cookie_manager() -> ScriptElement {
@@ -64,7 +65,7 @@ pub(crate) fn cookie_manager() -> ScriptElement {
             bool_prop("CookieManager.controlledByThreadGroup", false),
         ],
     )
-    .add_subs(vec![])
+    .with_subs(vec![])
 }
 
 pub(crate) fn header(name: &str, value: &str) -> ScriptElement {
@@ -76,21 +77,6 @@ pub(crate) fn header(name: &str, value: &str) -> ScriptElement {
             string_prop("Header.value", value),
         ],
     )
-}
-
-pub(crate) fn constant_timer(delay: u128) -> ScriptElement {
-    ScriptElement::from_children(
-        XmlEvent::start_element("ConstantTimer")
-            .attr("guiclass", "ConstantTimerGui")
-            .attr("testclass", "ConstantTimer")
-            .attr("testname", "Constant Timer")
-            .attr("enabled", "true"),
-        vec![string_prop(
-            "ConstantTimer.delay",
-            delay.to_string().as_str(),
-        )],
-    )
-    .add_subs(vec![])
 }
 
 pub(crate) fn request_default(protocol: &str, host: &str, port: &str) -> ScriptElement {
@@ -107,10 +93,32 @@ pub(crate) fn request_default(protocol: &str, host: &str, port: &str) -> ScriptE
             string_prop("HTTPSampler.protocol", protocol),
             string_prop("HTTPSampler.contentEncoding", ""),
             string_prop("HTTPSampler.path", ""),
-            string_prop("HTTPSampler.concurrentPool", ""),
+            string_prop("HTTPSampler.concurrentPool", "6"),
             string_prop("HTTPSampler.connect_timeout", ""),
             string_prop("HTTPSampler.response_timeout", ""),
         ],
     )
-    .add_subs(vec![])
+    .with_subs(vec![])
+}
+
+pub(crate) fn csv_data_set_config(config: &CsvDataSetConfig) -> ScriptElement {
+    ScriptElement::from_children(
+        XmlEvent::start_element("CSVDataSet")
+            .attr("guiclass", "TestBeanGUI")
+            .attr("testclass", "CSVDataSet")
+            .attr("testname", "CSV Data Set Config")
+            .attr("enabled", "true"),
+        vec![
+            string_prop("filename", config.filename.as_str()),
+            string_prop("fileEncoding", ""),
+            string_prop("variableNames", ""),
+            bool_prop("ignoreFirstLine", false),
+            string_prop("delimiter", ","),
+            bool_prop("quotedData", false),
+            bool_prop("recycle", config.recycle),
+            bool_prop("stopThread", config.stop_thread),
+            string_prop("shareMode", "shareMode.all"),
+        ],
+    )
+    .with_subs(vec![])
 }

@@ -49,3 +49,10 @@ features = [
     'BlobPropertyBag',
     'Url',
 ]
+
+[dev-dependencies]
+chrono = "0.4.23"
+
+[[example]]
+name = "login-and-request"
+path = "examples/login_and_request.rs"

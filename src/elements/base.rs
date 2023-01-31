@@ -1,7 +1,6 @@
 use crate::script::ScriptElement;
 use crate::xml::XmlEvent;
 
-#[allow(dead_code)]
 pub(crate) fn string_prop(name: &str, value: &str) -> ScriptElement {
     ScriptElement::from_str(
         XmlEvent::start_element("stringProp").attr("name", name),
@@ -9,7 +8,6 @@ pub(crate) fn string_prop(name: &str, value: &str) -> ScriptElement {
     )
 }
 
-#[allow(dead_code)]
 pub(crate) fn long_prop(name: &str, value: usize) -> ScriptElement {
     ScriptElement::from_str(
         XmlEvent::start_element("longProp").attr("name", name),
@@ -17,7 +15,24 @@ pub(crate) fn long_prop(name: &str, value: usize) -> ScriptElement {
     )
 }
 
-#[allow(dead_code)]
+pub(crate) fn int_prop(name: &str, value: usize) -> ScriptElement {
+    ScriptElement::from_str(
+        XmlEvent::start_element("intProp").attr("name", name),
+        value.to_string().as_str(),
+    )
+}
+
+pub(crate) fn double_prop(name: &str, value: f32) -> ScriptElement {
+    ScriptElement::from_children(
+        XmlEvent::start_element("doubleProp"),
+        vec![
+            ScriptElement::from_str(XmlEvent::start_element("name"), name),
+            ScriptElement::from_str(XmlEvent::start_element("value"), value.to_string().as_str()),
+            ScriptElement::from_str(XmlEvent::start_element("savedValue"), "0.0"),
+        ],
+    )
+}
+
 pub(crate) fn bool_prop(name: &str, value: bool) -> ScriptElement {
     ScriptElement::from_str(
         XmlEvent::start_element("boolProp").attr("name", name),
@@ -25,7 +40,6 @@ pub(crate) fn bool_prop(name: &str, value: bool) -> ScriptElement {
     )
 }
 
-#[allow(dead_code)]
 pub(crate) fn collection_prop(name: &str, value: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("collectionProp").attr("name", name),
@@ -33,7 +47,6 @@ pub(crate) fn collection_prop(name: &str, value: Vec<ScriptElement>) -> ScriptEl
     )
 }
 
-#[allow(dead_code)]
 pub(crate) fn element_prop(name: &str, e_type: &str, value: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("elementProp")
@@ -43,7 +56,6 @@ pub(crate) fn element_prop(name: &str, e_type: &str, value: Vec<ScriptElement>) 
     )
 }
 
-#[allow(dead_code)]
 pub(crate) fn obj_prop(name: &str, value: ScriptElement) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("objProp"),
@@ -54,22 +66,18 @@ pub(crate) fn obj_prop(name: &str, value: ScriptElement) -> ScriptElement {
     )
 }
 
-#[allow(dead_code)]
 pub(crate) fn value(class: &str, v: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from_children(XmlEvent::start_element("value").attr("class", class), v)
 }
 
-#[allow(dead_code)]
 pub(crate) fn string(k: &str, v: &str) -> ScriptElement {
     ScriptElement::from_str(XmlEvent::start_element(k), v)
 }
 
-#[allow(dead_code)]
 pub(crate) fn bool(k: &str, v: bool) -> ScriptElement {
     string(k, if v { "true" } else { "false" })
 }
 
-#[allow(dead_code)]
 pub(crate) fn element_props(name: &str, args: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from_children(
         XmlEvent::start_element("elementProp")
@@ -83,7 +91,6 @@ pub(crate) fn element_props(name: &str, args: Vec<ScriptElement>) -> ScriptEleme
     )
 }
 
-#[allow(dead_code)]
 pub(crate) fn hash_tree(children: Vec<ScriptElement>) -> ScriptElement {
     ScriptElement::from_children(XmlEvent::start_element("hashTree"), children)
 }

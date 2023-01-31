@@ -31,5 +31,5 @@ pub(crate) fn test_plan(children: Vec<ScriptElement>) -> ScriptElement {
             string_prop("TestPlan.user_define_classpath", ""),
         ],
     )
-    .add_subs(children)
+    .with_subs(children)
 }

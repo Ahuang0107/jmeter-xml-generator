@@ -27,12 +27,15 @@ impl ScriptElement {
             sub_elements: None,
         }
     }
-    pub fn add_subs(mut self, subs: Vec<ScriptElement>) -> ScriptElement {
+    pub fn add_subs(&mut self, subs: Vec<ScriptElement>) {
         if let Some(ref mut els) = self.sub_elements {
             els.extend(subs);
         } else {
             self.sub_elements = Some(subs)
         }
+    }
+    pub fn with_subs(mut self, subs: Vec<ScriptElement>) -> ScriptElement {
+        self.add_subs(subs);
         self
     }
     #[allow(dead_code)]
